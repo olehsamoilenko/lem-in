@@ -20,6 +20,8 @@ typedef struct	s_node
 	char			*name;
 	int				num_links;
 	struct s_node	**links;
+	// int				x;
+	// int				y;
 }				t_node;
 
 typedef struct	s_path
@@ -27,5 +29,13 @@ typedef struct	s_path
 	t_node			*node;
 	struct s_path	*next;
 }				t_path;
+
+typedef struct	s_lem
+{
+	int				n_nds;
+	t_node			*nds[100]; //nodes
+	int				n_pts;
+	t_path			*pts[100]; //pathes
+}				t_lem;
 
 #endif
