@@ -216,18 +216,57 @@ t_lem	*init()
 	return (lem);
 }
 
+void	error(char *message)
+{
+	ft_printf("ERROR: %s\n", message);
+	exit(0);
+}
+
+int		arrlen(char **arr)
+{
+	int i = 0;
+	while (arr[i])
+	{
+		i++;
+	}
+	return (i);
+}
+
+void	read_map(t_lem *lem)
+{
+	char *line;
+	
+	get_next_line(0, &line);
+	if (ft_atoi(line) > 0)
+		lem->ants = ft_atoi(line);
+	else
+		error("Incorrect number of ants");
+	ft_strdel(&line);
+	while (get_next_line(0, &line))
+	{
+		if (ft_strstr(line, "##start") != NULL)
+		{
+			ft_strdel(&line);
+			get_next_line(0, &line);
+
+		}
+	}
+	
+}
+
 int		main(void)
 {
 	t_lem *lem = init();
+	read_map(lem);
 
-	create_node("A", 1, lem);
+	// create_node("A", 1, lem);
 	// create_node("B", 2, lem);
 	// create_node("C", 3, lem);
 	// create_node("D", 3, lem);
 	// create_node("E", 2, lem);
-	create_node("F", 1, lem);
+	// create_node("F", 1, lem);
 
-	create_link("hello", "F", lem);
+	// create_link("hello", "F", lem);
 	// create_link("A", "C", lem);
 	// create_link("A", "F", lem);
 	// create_link("B", "D", lem);
@@ -236,7 +275,8 @@ int		main(void)
 	// create_link("F", "E", lem);
 	// create_link("D", "F", lem);
 
-	show_nodes(lem);
+	// show_nodes(lem);
+
 	// create_link(A, C);
 	// create_link(A, F);
 	// create_link(B, K);
@@ -247,23 +287,15 @@ int		main(void)
 	// create_link(E, F);
 	// create_link(D, F);
 
-	// t_path *second_path = copy_path(path);
-	// show_path(path);
-	// show_path(second_path);
-	// printf("%d\n", path_contains(path, E));
+	// t_node *start = find_node("A", lem->nds, lem->n_nds);
+	// t_node *end = find_node("F", lem->nds, lem->n_nds);
+	// t_path *path = create_path(start);
+	// find_pathes(start, end, path, lem);
 
-	t_node *start = find_node("A", lem->nds, lem->n_nds);
-	t_node *end = find_node("F", lem->nds, lem->n_nds);
-	t_path *path = create_path(start);
-	find_pathes(start, end, path, lem);
+	// int i = -1;
+	// while (++i < lem->n_pts)
+	// 	show_path(lem->pts[i]);
 
-	int i = -1;
-	while (++i < lem->n_pts)
-	{
-		show_path(lem->pts[i]);
-	}
-
-	// system("leaks lem-in");
-
+	system("leaks lem-in");
 	return (0);
 }

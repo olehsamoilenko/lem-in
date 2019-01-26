@@ -32,8 +32,11 @@ typedef struct	s_path
 
 typedef struct	s_lem
 {
+	int				ants;
 	int				n_nds;
 	t_node			*nds[100]; //nodes
+	t_node			*start;
+	t_node			*end;
 	int				n_pts;
 	t_path			*pts[100]; //pathes
 }				t_lem;
