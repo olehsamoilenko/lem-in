@@ -64,11 +64,6 @@ void	create_link(char *name1, char *name2, t_lem *lem)
 		printf("Unknown node: %s\n", name2);
 		return;
 	}
-	// if (find_node(name2, n1->links, 1) != NULL)
-	// {
-	// 	// printf("Duplicated link: %s - %s\n", name1, name2);
-	// 	return;
-	// }
 	int i = 0;
 	while (n1->links[i] != NULL)
 	{
@@ -186,12 +181,13 @@ void	delete_path(t_path *path)
 	free(path);
 }
 
-void	find_pathes(t_node *start, t_node *end, t_path *tmp)
+void	find_pathes(t_node *start, t_node *end, t_path *tmp, t_lem *lem)
 {
 	if (start == end)
 	{
-		show_path(tmp);
-		delete_path(tmp);
+		// show_path(tmp);
+		lem->pts[lem->n_pts++] = tmp;
+		// delete_path(tmp);
 		return;
 	}
 	int i = -1;
@@ -206,7 +202,7 @@ void	find_pathes(t_node *start, t_node *end, t_path *tmp)
 		{
 			t_path *p = copy_path(tmp);
 			add_to_path(p, start->links[i]);
-			find_pathes(start->links[i], end, p);
+			find_pathes(start->links[i], end, p, lem);
 		}
 	}
 	delete_path(tmp);
@@ -216,6 +212,7 @@ t_lem	*init()
 {
 	t_lem *lem = ft_memalloc(sizeof(t_lem));
 	lem->n_nds = 0;
+	lem->n_pts = 0;
 	return (lem);
 }
 
@@ -223,22 +220,21 @@ int		main(void)
 {
 	t_lem *lem = init();
 
-	create_node("A", 3, lem);
-	create_node("B", 2, lem);
-	create_node("C", 4, lem);
+	create_node("A", 1, lem);
+	// create_node("B", 2, lem);
+	// create_node("C", 3, lem);
+	// create_node("D", 3, lem);
+	// create_node("E", 2, lem);
 	create_node("F", 1, lem);
 
-	// t_node *D = create_node("D", 3);
-	// t_node *E = create_node("E", 2);
-	// t_node *F = create_node("F", 3);
-	// t_node *K = create_node("K", 2);
-	// t_node *M = create_node("M", 2);
-
-	create_link("A", "B", lem);
-	create_link("A", "C", lem);
-	create_link("A", "C", lem);
-	create_link("B", "C", lem);
-	create_link("C", "F", lem);
+	create_link("hello", "F", lem);
+	// create_link("A", "C", lem);
+	// create_link("A", "F", lem);
+	// create_link("B", "D", lem);
+	// create_link("C", "E", lem);
+	// create_link("C", "D", lem);
+	// create_link("F", "E", lem);
+	// create_link("D", "F", lem);
 
 	show_nodes(lem);
 	// create_link(A, C);
@@ -256,11 +252,16 @@ int		main(void)
 	// show_path(second_path);
 	// printf("%d\n", path_contains(path, E));
 
-	
 	t_node *start = find_node("A", lem->nds, lem->n_nds);
 	t_node *end = find_node("F", lem->nds, lem->n_nds);
 	t_path *path = create_path(start);
-	find_pathes(start, end, path);
+	find_pathes(start, end, path, lem);
+
+	int i = -1;
+	while (++i < lem->n_pts)
+	{
+		show_path(lem->pts[i]);
+	}
 
 	// system("leaks lem-in");
 
