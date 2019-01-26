@@ -18,10 +18,10 @@
 typedef struct	s_node
 {
 	char			*name;
-	int				num_links;
-	struct s_node	**links;
-	// int				x;
-	// int				y;
+	int				n_links;
+	struct s_node	*links[100];
+	int				x;
+	int				y;
 }				t_node;
 
 typedef struct	s_path
