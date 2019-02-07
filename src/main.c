@@ -32,7 +32,7 @@ void	error(char *message)
 	exit(0);
 }
 
-int		arrlen(char **arr)
+int		ft_arrlen(char **arr)
 {
 	int i = 0;
 	if (arr == NULL)
@@ -42,13 +42,13 @@ int		arrlen(char **arr)
 	return (i);
 }
 
-int		space_count(char *line)
+int		ft_char_count(char c, char *line)
 {
 	int i = -1;
 	int res = 0;
 	while (line[++i])
 	{
-		if (line[i] == ' ')
+		if (line[i] == c)
 			res++;
 	}
 	return (res);
@@ -203,7 +203,7 @@ void	create_link(t_node *node_1, t_node *node_2) // mb between nodes?
 		add_node_to_list(node_2->links, node_1);
 }
 
-t_list_of_nodes	*copy_path(t_list_of_nodes *path)
+t_list_of_nodes	*copy_list_of_nodes(t_list_of_nodes *path)
 {
 	t_list_of_nodes	*new_path = create_list_of_nodes(path->node);
 	while (path->next != NULL)
@@ -214,12 +214,12 @@ t_list_of_nodes	*copy_path(t_list_of_nodes *path)
 	return(new_path);
 }
 
-void	delete_node(t_node *node)
-{
-	ft_strdel(&node->name);
-	ft_memdel((void**)&node->links);
-	ft_memdel((void**)&node);
-}
+// void	delete_node(t_node *node)
+// {
+// 	ft_strdel(&node->name);
+// 	ft_memdel((void**)&node->links);
+// 	ft_memdel((void**)&node);
+// }
 
 void	delete_path(t_list_of_nodes *path)
 {
@@ -236,8 +236,16 @@ void	delete_path(t_list_of_nodes *path)
 	free(path);
 }
 
-void	find_pathes(t_node *start, t_node *end, t_list_of_nodes *tmp, t_lem *lem)
+void	find_pathes(t_node *end, t_list_of_nodes *tmp, t_lem *lem)
 {
+	t_node *start;
+	t_list_of_nodes *buf = tmp;
+	while (tmp)
+	{
+		start = tmp->node;
+		tmp = tmp->next;
+	}
+	tmp = buf;
 	if (start == end)
 	{
 		if (lem->pathes == NULL)
@@ -246,14 +254,14 @@ void	find_pathes(t_node *start, t_node *end, t_list_of_nodes *tmp, t_lem *lem)
 			add_path_to_list(lem->pathes, tmp);
 		return;
 	}
-	t_list_of_nodes *buf = start->links;
+	buf = start->links;
 	while (start->links)
 	{
 		if (!path_contains_node(tmp, start->links->node)) // else going back
 		{
-			t_list_of_nodes *list = copy_path(tmp);
-			add_node_to_list(list, start->links->node);
-			find_pathes(start->links->node, end, list, lem);
+			t_list_of_nodes *copy = copy_list_of_nodes(tmp);
+			add_node_to_list(copy, start->links->node);
+			find_pathes(end, copy, lem);
 		}
 		start->links = start->links->next;
 	}
@@ -265,9 +273,9 @@ t_node	*create_node(char *line)
 {
 
 	char **params = ft_strsplit(line, ' ');
-	if (arrlen(params) != 3)
+	if (ft_arrlen(params) != 3)
 		error("Incorrect number of a room properties");
-	if (space_count(line) != 2)
+	if (ft_char_count(' ', line) != 2)
 		error("Too many spaces defining a room");
 	if (params[0][0] == 'L')
 		error("Incorrect room name");
@@ -336,10 +344,6 @@ int		main(void)
 	add_node_to_list(lem->nodes, create_node("D 0 0"));
 	add_node_to_list(lem->nodes, create_node("E 0 0"));
 	add_node_to_list(lem->nodes, create_node("F 0 0"));
-
-	// create_link("hello", "F", lem);
-	// a->links = create_list_of_nodes(b);
-
 	create_link(find_node("A", lem->nodes), find_node("B", lem->nodes));
 	create_link(find_node("A", lem->nodes), find_node("C", lem->nodes));
 	create_link(find_node("B", lem->nodes), find_node("D", lem->nodes));
@@ -348,13 +352,10 @@ int		main(void)
 	create_link(find_node("F", lem->nodes), find_node("E", lem->nodes));
 	create_link(find_node("D", lem->nodes), find_node("F", lem->nodes));
 	create_link(find_node("D", lem->nodes), find_node("F", lem->nodes));
-
-	show_all_nodes(lem->nodes, lem);
-
-	t_node *start = find_node("A", lem->nodes);
 	t_node *end = find_node("F", lem->nodes);
-	t_list_of_nodes *path = create_list_of_nodes(start);
-	find_pathes(start, end, path, lem);
+	t_list_of_nodes *tmp = create_list_of_nodes(find_node("A", lem->nodes));
+	show_all_nodes(lem->nodes, lem);
+	find_pathes(end, tmp, lem);
 	show_all_pathes(lem->pathes);
 	system("leaks lem-in");
 	return (0);

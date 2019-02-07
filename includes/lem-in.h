@@ -25,7 +25,7 @@ typedef struct	s_node
 
 /*
 	name - room's name
-	links - array of pointers to linked rooms
+	links - list of pointers to linked rooms
 	x - coordinate x
 	y - coordinate y
 */
@@ -37,8 +37,8 @@ typedef struct	s_list_of_nodes
 }				t_list_of_nodes;
 
 /*
-	node - pointer to node
-	next - pointer to the next element of path
+	node - pointer to a node
+	next - pointer to the next element of the list
 */
 
 typedef struct	s_list_of_pathes
@@ -47,23 +47,26 @@ typedef struct	s_list_of_pathes
 	struct s_list_of_pathes	*next;
 }				t_list_of_pathes;
 
+/*
+	path - pointer to a path
+	next - pointer to the next element of the list
+*/
+
 typedef struct	s_lem
 {
-	int					ants;
-	t_list_of_nodes		*nodes;
-	t_node				*start;
-	t_node				*end;
-	t_list_of_pathes	*pathes;
+	int						ants;
+	t_list_of_nodes			*nodes;
+	t_node					*start;
+	t_node					*end;
+	t_list_of_pathes		*pathes;
 }				t_lem;
 
 /*
 	ants - number of ants
-	n_nds - number of nodes
-	nodes - list of poiners to nodes
-	start - pointer to start node
-	end - poiner to end node
-	n_pts - number of pathes
-	pts - array of pointer to pathes
+	nodes - list of pointers to nodes
+	start - pointer to the start node
+	end - poiner to the end node
+	pathes - list of start to end possible ways
 */
 
 #endif
