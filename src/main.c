@@ -186,29 +186,21 @@ void	add_path_to_list(t_list_of_pathes *list, t_list_of_nodes *path)
 	list->next->next = NULL;
 }
 
-void	create_link(char *name1, char *name2, t_lem *lem)
+void	create_link(t_node *node_1, t_node *node_2) // mb between nodes?
 {
-	t_node *n1 = find_node(name1, lem->nodes);
-	t_node *n2 = find_node(name2, lem->nodes);
-
-	if (n1 == NULL)
+	if (node_1 == NULL || node_2 == NULL)
 	{
-		printf("Unknown node: %s\n", name1);
+		printf("Unknown node\n");
 		return;
 	}
-	if (n2 == NULL)
-	{
-		printf("Unknown node: %s\n", name2);
-		return;
-	}
-	if (n1->links == NULL)
-		n1->links = create_list_of_nodes(n2);
-	else if (!path_contains_node(n1->links, n2))
-		add_node_to_list(n1->links, n2);
-	if (n2->links == NULL)
-		n2->links = create_list_of_nodes(n1);
-	else if (!path_contains_node(n2->links, n1))
-		add_node_to_list(n2->links, n1);
+	if (node_1->links == NULL)
+		node_1->links = create_list_of_nodes(node_2);
+	else if (!path_contains_node(node_1->links, node_2))
+		add_node_to_list(node_1->links, node_2);
+	if (node_2->links == NULL)
+		node_2->links = create_list_of_nodes(node_1);
+	else if (!path_contains_node(node_2->links, node_1))
+		add_node_to_list(node_2->links, node_1);
 }
 
 t_list_of_nodes	*copy_path(t_list_of_nodes *path)
@@ -244,34 +236,30 @@ void	delete_path(t_list_of_nodes *path)
 	free(path);
 }
 
-// void	find_pathes(t_node *start, t_node *end, t_list_of_nodes *tmp, t_lem *lem)
-// {
-// 	if (start == end)
-// 	{
-// 		// lem->pts[lem->n_pts++] = tmp;
-// 		if (lem->pathes == NULL)
-// 			lem->pathes = create_list_of_pathes(tmp);
-// 		else
-// 			add_path_to_list(lem->pathes, tmp);
-// 		return;
-// 	}
-// 	int i = -1;
-// 	while (++i < start->n_links)
-// 	{
-// 		if (start->links[i] == NULL)
-// 		{
-// 			printf("Something wrong with %s links\n", start->name);
-// 			return;
-// 		}
-// 		if (!path_contains(tmp, start->links[i])) // else going back
-// 		{
-// 			t_list_of_nodes *list = copy_path(tmp);
-// 			// add_to_path(list, start->links[i]);
-// 			find_pathes(start->links[i], end, list, lem);
-// 		}
-// 	}
-// 	delete_path(tmp);
-// }
+void	find_pathes(t_node *start, t_node *end, t_list_of_nodes *tmp, t_lem *lem)
+{
+	if (start == end)
+	{
+		if (lem->pathes == NULL)
+			lem->pathes = create_list_of_pathes(tmp);
+		else
+			add_path_to_list(lem->pathes, tmp);
+		return;
+	}
+	t_list_of_nodes *buf = start->links;
+	while (start->links)
+	{
+		if (!path_contains_node(tmp, start->links->node)) // else going back
+		{
+			t_list_of_nodes *list = copy_path(tmp);
+			add_node_to_list(list, start->links->node);
+			find_pathes(start->links->node, end, list, lem);
+		}
+		start->links = start->links->next;
+	}
+	start->links = buf;
+	delete_path(tmp);
+}
 
 t_node	*create_node(char *line)
 {
@@ -341,12 +329,9 @@ int		main(void)
 	t_lem *lem = init();
 	// read_map(lem);
 
-	t_node *a = create_node("A 0 0");
-	t_node *b = create_node("B 0 0");
-
 	if (lem->nodes == NULL)
-		lem->nodes = create_list_of_nodes(a);
-	add_node_to_list(lem->nodes, b);
+		lem->nodes = create_list_of_nodes(create_node("A 0 0"));
+	add_node_to_list(lem->nodes, create_node("B 0 0"));
 	add_node_to_list(lem->nodes, create_node("C 0 0"));
 	add_node_to_list(lem->nodes, create_node("D 0 0"));
 	add_node_to_list(lem->nodes, create_node("E 0 0"));
@@ -355,36 +340,22 @@ int		main(void)
 	// create_link("hello", "F", lem);
 	// a->links = create_list_of_nodes(b);
 
-	create_link("A", "F", lem);
-	create_link("B", "D", lem);
-	create_link("C", "E", lem);
-	create_link("C", "D", lem);
-	create_link("F", "E", lem);
-	create_link("D", "F", lem);
-	create_link("D", "F", lem);
+	create_link(find_node("A", lem->nodes), find_node("B", lem->nodes));
+	create_link(find_node("A", lem->nodes), find_node("C", lem->nodes));
+	create_link(find_node("B", lem->nodes), find_node("D", lem->nodes));
+	create_link(find_node("C", lem->nodes), find_node("E", lem->nodes));
+	create_link(find_node("C", lem->nodes), find_node("D", lem->nodes));
+	create_link(find_node("F", lem->nodes), find_node("E", lem->nodes));
+	create_link(find_node("D", lem->nodes), find_node("F", lem->nodes));
+	create_link(find_node("D", lem->nodes), find_node("F", lem->nodes));
 
 	show_all_nodes(lem->nodes, lem);
-	show_all_nodes(lem->nodes, lem);
 
-	// t_node *start = find_node("A", lem->nodes);
-	// t_node *end = find_node("F", lem->nodes);
-
-
-	// t_list_of_nodes *path = create_list_of_nodes(start);
-	// t_list_of_nodes *path_end = create_list_of_nodes(end);
-	// add_node_to_list(path, find_node("B", lem->nodes));
-
-	// if (lem->pathes == NULL)
-	// 	lem->pathes = create_list_of_pathes(path);
-	// add_path_to_list(lem->pathes, path_end);
-
-
-	// show_all_pathes(lem->pathes);
-	// show_all_pathes(lem->pathes);
-
-	// find_pathes(start, end, path, lem);
-
-
-	// system("leaks lem-in");
+	t_node *start = find_node("A", lem->nodes);
+	t_node *end = find_node("F", lem->nodes);
+	t_list_of_nodes *path = create_list_of_nodes(start);
+	find_pathes(start, end, path, lem);
+	show_all_pathes(lem->pathes);
+	system("leaks lem-in");
 	return (0);
 }
