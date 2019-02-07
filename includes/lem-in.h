@@ -17,28 +17,53 @@
 
 typedef struct	s_node
 {
-	char			*name;
-	int				n_links;
-	struct s_node	*links[100];
-	int				x;
-	int				y;
+	char					*name;
+	struct s_list_of_nodes	*links;
+	int						x;
+	int						y;
 }				t_node;
 
-typedef struct	s_path
+/*
+	name - room's name
+	links - array of pointers to linked rooms
+	x - coordinate x
+	y - coordinate y
+*/
+
+typedef struct	s_list_of_nodes
 {
-	t_node			*node;
-	struct s_path	*next;
-}				t_path;
+	t_node					*node;
+	struct s_list_of_nodes	*next;
+}				t_list_of_nodes;
+
+/*
+	node - pointer to node
+	next - pointer to the next element of path
+*/
+
+typedef struct	s_list_of_pathes
+{
+	t_list_of_nodes			*path;
+	struct s_list_of_pathes	*next;
+}				t_list_of_pathes;
 
 typedef struct	s_lem
 {
-	int				ants;
-	int				n_nds;
-	t_node			*nds[100]; //nodes
-	t_node			*start;
-	t_node			*end;
-	int				n_pts;
-	t_path			*pts[100]; //pathes
+	int					ants;
+	t_list_of_nodes		*nodes;
+	t_node				*start;
+	t_node				*end;
+	t_list_of_pathes	*pathes;
 }				t_lem;
+
+/*
+	ants - number of ants
+	n_nds - number of nodes
+	nodes - list of poiners to nodes
+	start - pointer to start node
+	end - poiner to end node
+	n_pts - number of pathes
+	pts - array of pointer to pathes
+*/
 
 #endif
