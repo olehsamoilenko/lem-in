@@ -14,6 +14,9 @@
 
 #include <stdio.h>
 
+#define ROOMS_MODE 0
+#define LINKS_MODE 1
+
 
 t_lem	*init()
 {
@@ -198,17 +201,24 @@ void	add_path_to_list(t_list_of_pathes **list, t_list_of_nodes *path)
 	}
 }
 
-void	create_link(t_node *node_1, t_node *node_2) // mb between nodes?
+void	create_link(t_node *node_1, t_node *node_2)
 {
 	if (node_1 == NULL || node_2 == NULL)
-	{
-		printf("Unknown node\n");
-		return;
-	}
+		error("Link contains an unknown room");
 	if (!path_contains_node(node_1->links, node_2))
 		add_node_to_list(&node_1->links, node_2);
 	if (!path_contains_node(node_2->links, node_1))
 		add_node_to_list(&node_2->links, node_1);
+}
+
+void	parse_link(char *line, t_lem *lem)
+{
+	char **params = ft_strsplit(line, '-');
+	if (ft_arrlen(params) != 2)
+		error("Link definition example: room_1-room_2");
+	t_node *n1 = find_node(params[0], lem->nodes);
+	t_node *n2 = find_node(params[1], lem->nodes);
+	create_link(n1, n2);
 }
 
 t_list_of_nodes	*copy_list_of_nodes(t_list_of_nodes *path)
@@ -285,7 +295,9 @@ t_node	*create_node(char *line)
 	if (ft_char_count(' ', line) != 2)
 		error("Room definition example: 'name x y'");
 	if (params[0][0] == 'L')
-		error("Incorrect room name");
+		error("Room's name must not start with the character 'L'");
+	if (ft_char_count('-', params[0]) != 0)
+		error("Room's name must not contain the character '-'");
 	t_node	*node = ft_memalloc(sizeof(t_node));
 	node->name = ft_strdup(params[0]);
 	itoa1 = ft_itoa(ft_atoi(params[1]));
@@ -307,6 +319,7 @@ t_node	*create_node(char *line)
 void	read_map(t_lem *lem)
 {
 	char *line;
+	int mode = ROOMS_MODE;
 	
 	get_next_line(0, &line);
 	char *itoa = ft_itoa(ft_atoi(line));
@@ -338,13 +351,18 @@ void	read_map(t_lem *lem)
 				error("Too much start rooms");
 			lem->end = buf;
 		}
-		// else if ()
-		// {
-			
-		// }
 		else if (line[0] == '#')
 		{
 			printf("%s skipped\n", line);
+		}
+		else if (mode == LINKS_MODE || ft_strchr(line, '-'))
+		{
+			parse_link(line, lem);
+			mode = LINKS_MODE;
+		}
+		else if (mode == ROOMS_MODE)
+		{
+			add_node_to_list(&lem->nodes, create_node(line));
 		}
 		ft_strdel(&line);
 	}
