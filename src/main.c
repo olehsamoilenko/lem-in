@@ -177,6 +177,14 @@ t_list_of_pathes *create_list_of_pathes(t_list_of_nodes *first_path)
 	return (list);
 }
 
+void		check_parameters_equalness(t_node *node_1, t_node *node_2, t_lem *lem)
+{
+	if (ft_strequ(node_1->name, node_2->name))
+		error("Room's name must be unique", lem);
+	if (node_1->x == node_2->x && node_1->y == node_2->y)
+		error("Room's coordinates must be unique", lem);
+}
+
 void	add_node_to_list(t_list_of_nodes **list, t_node *node, t_lem *lem)
 {
 	
@@ -185,13 +193,15 @@ void	add_node_to_list(t_list_of_nodes **list, t_node *node, t_lem *lem)
 	else
 	{
 		t_list_of_nodes *start = *list;
+
 		while ((*list)->next != NULL)
 		{
-			// if (ft_strequ((*list)->node->name, node->name))
-			// 	error("Room's name must be unique", lem);
+			
+			check_parameters_equalness((*list)->node, node, lem);
 			*list = (*list)->next;
 		}
-			
+		check_parameters_equalness((*list)->node, node, lem);
+	
 		(*list)->next = ft_memalloc(sizeof(t_list_of_nodes));
 		(*list)->next->node = node;
 		(*list)->next->next = NULL;
@@ -313,11 +323,9 @@ void	read_map(t_lem *lem)
 	{
 		if (ft_strequ(line, "##start"))
 		{
-
 			ft_strdel(&line);
 			get_next_line_counter(GNL_READ_MODE, 0, &line);
 			t_node *buf = create_node(line, lem);
-			
 			add_node_to_list(&lem->nodes, buf, lem);
 			if (lem->start != NULL)
 				error("Too much start rooms", lem);
@@ -352,7 +360,8 @@ void	read_map(t_lem *lem)
 void	find_pathes(t_node *end, t_list_of_nodes *tmp, t_lem *lem)
 {
 	t_node *start;
-	t_list_of_nodes *buf = tmp;
+	t_list_of_nodes *buf;
+	buf = tmp;
 	while (tmp)
 	{
 		start = tmp->node;

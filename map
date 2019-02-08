@@ -1,12 +1,12 @@
 3
 ##start
-A 0 0
-B 0 0
+A 0 1
 C 0 0
-D 0 0
-E 0 0
+B 0 2
+D 0 3
+E 0 4
 ##end
-F 0 0
+F 0 5
 A-B
 A-C
 B-D
