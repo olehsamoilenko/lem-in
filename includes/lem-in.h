@@ -33,11 +33,13 @@ typedef struct	s_node
 typedef struct	s_list_of_nodes
 {
 	t_node					*node;
+	int						group;
 	struct s_list_of_nodes	*next;
 }				t_list_of_nodes;
 
 /*
 	node - pointer to a node
+	group - pathes of the same group can be used together
 	next - pointer to the next element of the list
 */
 

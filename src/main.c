@@ -127,6 +127,17 @@ t_node	*find_node(char *name, t_list_of_nodes *nodes)
 	return (NULL);
 }
 
+int		path_len(t_list_of_nodes *list)
+{
+	int i = 0;
+	while (list)
+	{
+		i++;
+		list = list->next;
+	}
+	return (i - 1);
+}
+
 
 void	show_path(t_list_of_nodes *path)
 {
@@ -135,6 +146,7 @@ void	show_path(t_list_of_nodes *path)
 		printf("Path is clear\n");
 		return;
 	}
+	printf("Length: %d, group %d: ", path_len(path), path->group);
 	while (1)
 	{
 		printf("%s", path->node->name);
@@ -165,6 +177,7 @@ t_list_of_nodes	*create_list_of_nodes(t_node *first_node)
 {
 	t_list_of_nodes *list = ft_memalloc(sizeof(t_list_of_nodes));
 	list->node = first_node;
+	list->group = 0;
 	list->next = NULL;
 	return (list);
 }
@@ -344,7 +357,7 @@ void	read_map(t_lem *lem)
 		}
 		else if (line[0] == '#')
 		{
-			printf("%s skipped\n", line);
+			// printf("%s skipped\n", line);
 		}
 		else if (mode == MAP_LINKS_MODE || ft_strchr(line, '-'))
 		{
@@ -388,21 +401,148 @@ void	find_pathes(t_node *end, t_list_of_nodes *tmp, t_lem *lem)
 	delete_path(tmp);
 }
 
+
+
+void	swap_pathes(t_list_of_nodes **a, t_list_of_nodes **b)
+{
+	t_list_of_nodes *tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+
+void	sort_pathes_by_length(t_list_of_pathes *list)
+{
+	t_list_of_pathes *tmp = list;
+	int i = -1;
+	while (tmp)
+	{
+		t_list_of_pathes *start = list;
+		while (list->next)
+		{
+
+			if (path_len(list->path) > path_len(list->next->path))
+				swap_pathes(&list->path, &list->next->path);
+			list = list->next;
+
+		}
+		list = start;
+		tmp = tmp->next;
+	}
+}
+
+void	sort_pathes_by_group(t_list_of_pathes *list)
+{
+	t_list_of_pathes *tmp = list;
+	int i = -1;
+	while (tmp)
+	{
+		t_list_of_pathes *start = list;
+		while (list->next)
+		{
+
+			if (list->path->group > list->next->path->group)
+				swap_pathes(&list->path, &list->next->path);
+			list = list->next;
+
+		}
+		list = start;
+		tmp = tmp->next;
+	}
+}
+
+int		pathes_are_connected(t_list_of_nodes *path_1, t_list_of_nodes *path_2, t_lem *lem)
+{
+	while (path_1)
+	{
+		if (path_1->node != lem->start && path_1->node != lem->end &&
+			path_contains_node(path_2, path_1->node))
+		return (1);
+		path_1 = path_1->next;
+	}
+	
+	return (0);
+}
+
+void	check_compatibility(t_list_of_nodes *path, t_list_of_pathes *list, t_lem *lem)
+{
+	while (list)
+	{
+		if (pathes_are_connected(path, list->path, lem))
+		{
+			list->path->group = path->group + 1;
+			// printf("found\n");
+		}
+		list = list->next;
+	}
+}
+
+void	split_to_groups(t_list_of_pathes *list, t_lem *lem)
+{
+	if (list == NULL)
+		error("Not enough data to process", lem);
+	while (list->next)
+	{
+		check_compatibility(list->path, list->next, lem);
+		// show_all_pathes(lem->pathes);
+		list = list->next;
+	}
+	
+}
+
+int		select_optimal_group(t_list_of_pathes *list, t_lem *lem)
+{
+	int group = -1;
+	int pathes=  0;
+	int total_length=  0;
+	int steps;
+	int min = __INT_MAX__;
+	int res_value;
+	while (list)
+	{
+		if (list->path->group != group)
+		{
+			if (group != -1)
+			{
+				steps = (lem->ants + total_length) / pathes - 1;
+				if (steps < min)
+				{
+					min = steps;
+					res_value = group;
+				}
+					
+				printf("Group %d. Pathes: %d, steps: %d", group, pathes, steps);
+				if (lem->ants > pathes && (lem->ants + total_length) % pathes != 0)
+					printf(" + 1\n");
+				else
+					printf("\n");
+			}
+			group++;
+			pathes = 0;
+			total_length = 0;
+		}
+		pathes += 1;
+		total_length += path_len(list->path);
+		list = list->next;
+	}
+	steps = (lem->ants + total_length) / pathes - 1;
+	if (steps < min)
+	{
+		min = steps;
+		res_value = group;
+	}
+	printf("Group %d. Pathes: %d, steps: %d", group, pathes, steps);
+	if (lem->ants > pathes && (lem->ants + total_length) % pathes != 0)
+		printf(" + 1\n");
+	else
+		printf("\n");
+	return (res_value);
+}
+
+
 int		main(void)
 {
 	t_lem *lem = init();
 	read_map(lem);
-
-	// t_node *a = create_node("A 0 0", lem);
-	// t_node *b = create_node("B 0 0", lem);
-	// t_node *c = create_node("C 0 0", lem);
-	// add_node_to_list(&lem->nodes, a);
-	// add_node_to_list(&lem->nodes, b);
-	// add_node_to_list(&lem->nodes, c);
-	// lem->start = a;
-	// lem->end = c;
-	// create_link("A-B", lem);
-	// create_link("C-B", lem);
 
 	if (lem->start == NULL)
 		error("The start room is missing", lem);
@@ -412,8 +552,16 @@ int		main(void)
 	find_pathes(lem->end, create_list_of_nodes(lem->start), lem);
 	show_all_pathes(lem->pathes);
 
-	show_all_nodes(lem->nodes, lem);
+	sort_pathes_by_length(lem->pathes);
+	show_all_pathes(lem->pathes);
 
+	split_to_groups(lem->pathes, lem);
+	// show_all_pathes(lem->pathes);
+
+	// sort_pathes_by_group(lem->pathes);
+	// show_all_pathes(lem->pathes);
+
+	// printf("Optimal group: %d\n", select_optimal_group(lem->pathes, lem));
 
 	system("leaks lem-in");
 	return (0);
