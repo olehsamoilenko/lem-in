@@ -13,7 +13,7 @@
 #ifndef LEM_IN_H
 # define LEM_IN_H
 
-#include "libft.h"
+# include "libft.h"
 
 typedef struct	s_node
 {
@@ -24,16 +24,16 @@ typedef struct	s_node
 }				t_node;
 
 /*
-	name - room's name
-	links - list of pointers to linked rooms
-	x - coordinate x
-	y - coordinate y
+**	name - room's name
+**	links - list of pointers to linked rooms
+**	x - coordinate x
+**	y - coordinate y
 */
 
 typedef struct	s_list_of_nodes
 {
 	t_node					*node;
-	int						group;
+	// int						group;
 	struct s_list_of_nodes	*next;
 }				t_list_of_nodes;
 

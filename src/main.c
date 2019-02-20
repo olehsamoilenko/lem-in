@@ -18,6 +18,8 @@
 #define MAP_LINKS_MODE 1
 #define GNL_READ_MODE 0
 #define GNL_RETURN_COUNT_MODE 1
+// #define SORT_ASCENDING 0
+// #define SORT_DESCEDING 1
 
 void	show_node(t_node *node, t_lem *lem)
 {
@@ -146,7 +148,7 @@ void	show_path(t_list_of_nodes *path)
 		printf("Path is clear\n");
 		return;
 	}
-	printf("Length: %d, group %d: ", path_len(path), path->group);
+	printf("Length: %d\t", path_len(path));
 	while (1)
 	{
 		printf("%s", path->node->name);
@@ -177,7 +179,7 @@ t_list_of_nodes	*create_list_of_nodes(t_node *first_node)
 {
 	t_list_of_nodes *list = ft_memalloc(sizeof(t_list_of_nodes));
 	list->node = first_node;
-	list->group = 0;
+	// list->group = 0;
 	list->next = NULL;
 	return (list);
 }
@@ -410,45 +412,47 @@ void	swap_pathes(t_list_of_nodes **a, t_list_of_nodes **b)
 	*b = tmp;
 }
 
-void	sort_pathes_by_length(t_list_of_pathes *list)
-{
-	t_list_of_pathes *tmp = list;
-	int i = -1;
-	while (tmp)
-	{
-		t_list_of_pathes *start = list;
-		while (list->next)
-		{
+// void	sort_pathes_by_length(t_list_of_pathes *list, int sort_mode)
+// {
+// 	t_list_of_pathes *tmp = list;
+// 	int i = -1;
+// 	while (tmp)
+// 	{
+// 		t_list_of_pathes *start = list;
+// 		while (list->next)
+// 		{
 
-			if (path_len(list->path) > path_len(list->next->path))
-				swap_pathes(&list->path, &list->next->path);
-			list = list->next;
+// 			if (path_len(list->path) > path_len(list->next->path) && sort_mode == SORT_ASCENDING)
+// 				swap_pathes(&list->path, &list->next->path);
+// 			else if (path_len(list->path) < path_len(list->next->path) && sort_mode == SORT_DESCEDING)
+// 				swap_pathes(&list->path, &list->next->path);
+// 			list = list->next;
 
-		}
-		list = start;
-		tmp = tmp->next;
-	}
-}
+// 		}
+// 		list = start;
+// 		tmp = tmp->next;
+// 	}
+// }
 
-void	sort_pathes_by_group(t_list_of_pathes *list)
-{
-	t_list_of_pathes *tmp = list;
-	int i = -1;
-	while (tmp)
-	{
-		t_list_of_pathes *start = list;
-		while (list->next)
-		{
+// void	sort_pathes_by_group(t_list_of_pathes *list)
+// {
+// 	t_list_of_pathes *tmp = list;
+// 	int i = -1;
+// 	while (tmp)
+// 	{
+// 		t_list_of_pathes *start = list;
+// 		while (list->next)
+// 		{
 
-			if (list->path->group > list->next->path->group)
-				swap_pathes(&list->path, &list->next->path);
-			list = list->next;
+// 			if (list->path->group > list->next->path->group)
+// 				swap_pathes(&list->path, &list->next->path);
+// 			list = list->next;
 
-		}
-		list = start;
-		tmp = tmp->next;
-	}
-}
+// 		}
+// 		list = start;
+// 		tmp = tmp->next;
+// 	}
+// }
 
 int		pathes_are_connected(t_list_of_nodes *path_1, t_list_of_nodes *path_2, t_lem *lem)
 {
@@ -463,80 +467,80 @@ int		pathes_are_connected(t_list_of_nodes *path_1, t_list_of_nodes *path_2, t_le
 	return (0);
 }
 
-void	check_compatibility(t_list_of_nodes *path, t_list_of_pathes *list, t_lem *lem)
-{
-	while (list)
-	{
-		if (pathes_are_connected(path, list->path, lem))
-		{
-			list->path->group = path->group + 1;
-			// printf("found\n");
-		}
-		list = list->next;
-	}
-}
+// void	check_compatibility(t_list_of_nodes *path, t_list_of_pathes *list, t_lem *lem)
+// {
+// 	while (list)
+// 	{
+// 		if (pathes_are_connected(path, list->path, lem))
+// 		{
+// 			list->path->group = path->group + 1;
+// 			// printf("found\n");
+// 		}
+// 		list = list->next;
+// 	}
+// }
 
-void	split_to_groups(t_list_of_pathes *list, t_lem *lem)
-{
-	if (list == NULL)
-		error("Not enough data to process", lem);
-	while (list->next)
-	{
-		check_compatibility(list->path, list->next, lem);
-		// show_all_pathes(lem->pathes);
-		list = list->next;
-	}
+// void	split_to_groups(t_list_of_pathes *list, t_lem *lem)
+// {
+// 	if (list == NULL)
+// 		error("Not enough data to process", lem);
+// 	while (list->next)
+// 	{
+// 		check_compatibility(list->path, list->next, lem);
+// 		// show_all_pathes(lem->pathes);
+// 		list = list->next;
+// 	}
 	
-}
+// }
 
-int		select_optimal_group(t_list_of_pathes *list, t_lem *lem)
-{
-	int group = -1;
-	int pathes=  0;
-	int total_length=  0;
-	int steps;
-	int min = __INT_MAX__;
-	int res_value;
-	while (list)
-	{
-		if (list->path->group != group)
-		{
-			if (group != -1)
-			{
-				steps = (lem->ants + total_length) / pathes - 1;
-				if (steps < min)
-				{
-					min = steps;
-					res_value = group;
-				}
+// int		select_optimal_group(t_list_of_pathes *list, t_lem *lem)
+// {
+// 	int group = -1;
+// 	int pathes=  0;
+// 	int total_length=  0;
+// 	int steps;
+// 	int min = __INT_MAX__;
+// 	int res_value;
+// 	while (list)
+// 	{
+// 		if (list->path->group != group)
+// 		{
+// 			if (group != -1)
+// 			{
+// 				steps = (lem->ants + total_length) / pathes - 1;
+// 				if (steps < min)
+// 				{
+// 					min = steps;
+// 					res_value = group;
+// 				}
 					
-				printf("Group %d. Pathes: %d, steps: %d", group, pathes, steps);
-				if (lem->ants > pathes && (lem->ants + total_length) % pathes != 0)
-					printf(" + 1\n");
-				else
-					printf("\n");
-			}
-			group++;
-			pathes = 0;
-			total_length = 0;
-		}
-		pathes += 1;
-		total_length += path_len(list->path);
-		list = list->next;
-	}
-	steps = (lem->ants + total_length) / pathes - 1;
-	if (steps < min)
-	{
-		min = steps;
-		res_value = group;
-	}
-	printf("Group %d. Pathes: %d, steps: %d", group, pathes, steps);
-	if (lem->ants > pathes && (lem->ants + total_length) % pathes != 0)
-		printf(" + 1\n");
-	else
-		printf("\n");
-	return (res_value);
-}
+// 				printf("Group %d. Pathes: %d, steps: %d", group, pathes, steps);
+// 				if (lem->ants > pathes && (lem->ants + total_length) % pathes != 0)
+// 					printf(" + 1\n");
+// 				else
+// 					printf("\n");
+// 			}
+// 			group++;
+// 			pathes = 0;
+// 			total_length = 0;
+// 		}
+// 		pathes += 1;
+// 		total_length += path_len(list->path);
+// 		list = list->next;
+// 	}
+// 	steps = (lem->ants + total_length) / pathes - 1;
+// 	if (steps < min)
+// 	{
+// 		min = steps;
+// 		res_value = group;
+// 	}
+// 	printf("Group %d. Pathes: %d, steps: %d", group, pathes, steps);
+// 	if (lem->ants > pathes && (lem->ants + total_length) % pathes != 0)
+// 		printf(" + 1\n");
+// 	else
+// 		printf("\n");
+// 	return (res_value);
+// }
 
 
 int		main(void)
@@ -552,16 +556,19 @@ int		main(void)
 	find_pathes(lem->end, create_list_of_nodes(lem->start), lem);
 	show_all_pathes(lem->pathes);
 
-	sort_pathes_by_length(lem->pathes);
-	show_all_pathes(lem->pathes);
 
-	split_to_groups(lem->pathes, lem);
-	// show_all_pathes(lem->pathes);
 
+
+
+
+	
+	// sort_pathes_by_length(lem->pathes, SORT_ASCENDING);
+	// split_to_groups(lem->pathes, lem);
 	// sort_pathes_by_group(lem->pathes);
 	// show_all_pathes(lem->pathes);
+	// printf("\nOptimal group: %d\n", select_optimal_group(lem->pathes, lem));
 
-	// printf("Optimal group: %d\n", select_optimal_group(lem->pathes, lem));
+
 
 	system("leaks lem-in");
 	return (0);
