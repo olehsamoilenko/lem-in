@@ -407,7 +407,8 @@ t_list_of_nodes		*form_path(t_node *node, t_lem *lem)
 			delete_path(path);
 			return (NULL);
 		}
-		node->bfs_used += 1;
+		if (node != lem->start && node != lem->end)
+			node->bfs_used = 1;
 		add_node_to_list_back(&path, node, lem);
 		node = node->bfs_prev;
 	}
@@ -428,7 +429,7 @@ void	bfs(t_lem *lem)
 {
 	t_list_of_nodes *queue = create_list_of_nodes(lem->end);
 	lem->end->bfs_in_queue = 1;
-	lem->end->bfs_prev = NULL;
+	// lem->end->bfs_prev = NULL;
 	t_node *curr;
 	t_list_of_nodes *links;
 
@@ -438,31 +439,28 @@ void	bfs(t_lem *lem)
 		links = curr->links;
 		while (links)
 		{
-			if (links->node->bfs_in_queue == 0)
+			if (links->node->bfs_in_queue == 0 && links->node->bfs_used == 0)
 			{
-				links->node->bfs_in_queue += 1;
+				
 				links->node->bfs_prev = curr;
 				if (links->node == lem->start)
 				{
-					printf("path forming: ");
 					t_list_of_nodes *path = form_path(lem->start, lem);
 					show_path(path);
 					delete_path(path);
-					lem->start->bfs_in_queue = 0;
-					lem->start->bfs_used = 0;
-					lem->end->bfs_used = 0;
-					lem->start->bfs_prev = NULL;
 
-					// printf("Nodes: ");
-					// show_all_nodes(lem->nodes, lem);
 				}
 				else
+				{
+					links->node->bfs_in_queue = 1;
 					add_node_to_list_back(&queue, links->node, lem);
+				}
+					
 			}
 			links = links->next;
 		}
-		printf("Queue: ");
-		show_all_nodes(queue, lem);
+		// printf("Queue: ");
+		// show_all_nodes(queue, lem);
 	}
 	delete_path(queue);
 }
