@@ -13,3 +13,10 @@ ni = (N+l1+l2+...lk)/k-li
 с помощью выбранной группы путей равняется:
 t = ni+(li-1) = (N+L)/k-li+li-1 = (N+L)/k-1
 (+1, если остаются лишние муравьи, то есть (N+L)%k != 0)
+
+http://graphonline.ru/?graph=yKeYUYwBJdBluVcy complicated1
+http://graphonline.ru/?graph=gTvvhJVhAMXwDzCk double_ways
+http://graphonline.ru/?graph=pPZVUCqghhZDquNm two_way_different_length
+http://graphonline.ru/?graph=GpbTWFxsKDcsfohr two_ways_connected
+http://graphonline.ru/?graph=vFrwpEhoDmIrKpzY two_ways_collision
+http://graphonline.ru/?graph=zPIJdNYGwHRnsvtL one_way_through_three
