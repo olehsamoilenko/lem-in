@@ -1,0 +1,19 @@
+1
+##start
+a 0 0
+b 1 1
+c 2 2
+d 3 3
+##end
+e 4 4
+f 5 5
+g 6 6
+a-b
+a-c
+c-d
+b-d
+b-f
+f-e
+d-e
+#e-g
+#timeout
