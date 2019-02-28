@@ -21,16 +21,16 @@
 void	show_node(t_node *node, t_lem *lem)
 {
 	if (lem->start == node)
-		printf("START: ");
+		printf("START:");
 	else if (lem->end == node)
-		printf("END: ");
-	printf("name: %s, ", node->name);
+		printf("END:");
+	printf("\tname: %s,\t", node->name);
 	if (node->bfs_prev == NULL)
-		printf("prev: null,\t");
+		printf("prev: -,");
 	else
-		printf("prev: %s, ", node->bfs_prev->name);
-	printf("bfs_dist: %d, bfs_path_id: %d, bfs_used: %d, links: ",
-		node->bfs_dist, node->bfs_path_id, node->bfs_used);
+		printf("prev: %s,", node->bfs_prev->name);
+	printf("\tin_queue: %d,\tbfs_used: %d,\tlinks: ",
+		node->bfs_in_queue, node->bfs_used);
 
 	
 	t_list_of_nodes *start = node->links;
@@ -153,17 +153,14 @@ void	show_path(t_list_of_nodes *path)
 		printf("Path is clear\n");
 		return;
 	}
-	printf("Length: %d\t", path_len(path));
+	// printf("Length: %d\t", path_len(path));
 	while (1)
 	{
-		printf("%s", path->node->name);
-		if (path->next != NULL)
-		{
-			printf("->");
-			path = path->next;
-		}
-		else
+		printf("%s->", path->node->name);
+		if (path->next == NULL)
 			break;
+		path = path->next;
+		
 	}
 	printf("\n");
 }
@@ -294,12 +291,9 @@ t_node	*create_node(char *line, t_lem *lem)
 
 	t_node	*node = ft_memalloc(sizeof(t_node));
 	node->name = ft_strdup(params[0]);
-	node->bfs_dist = -1;
-	node->bfs_path_id = -1;
 	node->bfs_used = 0;
 	node->bfs_in_queue = 0;
 	node->bfs_prev = NULL;
-	// node->bfs_marked = 0;
 	itoa1 = ft_itoa(ft_atoi(params[1]));
 	itoa2 = ft_itoa(ft_atoi(params[2]));
 	if (ft_strequ(itoa1, params[1]) && ft_strequ(itoa2, params[2]))
@@ -395,74 +389,75 @@ t_node	*pop_front(t_list_of_nodes **list)
 	return (res);
 }
 
-t_list_of_nodes		*form_path(t_node *node, t_lem *lem)
+t_list_of_nodes *mark_path(t_node *node, t_lem *lem)
 {
-	// show_all_nodes(lem->nodes, lem);
 	t_list_of_nodes *path = NULL;
+
 	while (node)
 	{
-		if (node->bfs_used == 1)
-		{
-			printf("path contains already used nodes: %s\n", node->name);
-			delete_path(path);
-			return (NULL);
-		}
-		if (node != lem->start && node != lem->end)
-			node->bfs_used = 1;
 		add_node_to_list_back(&path, node, lem);
+		node->bfs_used = 1;
 		node = node->bfs_prev;
 	}
 	return (path);
 }
 
-// void	clear_queue(t_list_of_nodes *queue)
-// {
-// 	while (queue)
-// 	{
-// 		queue->node->bfs_used = 0;
-// 		queue->node->bfs_prev = NULL;
-// 		queue = queue->next;
-// 	}
-// }
-
-void	bfs(t_lem *lem)
+void reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem)
 {
-	t_list_of_nodes *queue = create_list_of_nodes(lem->end);
-	lem->end->bfs_in_queue = 1;
-	// lem->end->bfs_prev = NULL;
-	t_node *curr;
-	t_list_of_nodes *links;
-
-	while (queue)
+	while (nodes)
 	{
-		curr = pop_front(&queue);
-		links = curr->links;
-		while (links)
-		{
-			if (links->node->bfs_in_queue == 0 && links->node->bfs_used == 0)
-			{
-				
-				links->node->bfs_prev = curr;
-				if (links->node == lem->start)
-				{
-					t_list_of_nodes *path = form_path(lem->start, lem);
-					show_path(path);
-					delete_path(path);
-
-				}
-				else
-				{
-					links->node->bfs_in_queue = 1;
-					add_node_to_list_back(&queue, links->node, lem);
-				}
-					
-			}
-			links = links->next;
-		}
-		// printf("Queue: ");
-		// show_all_nodes(queue, lem);
+		nodes->node->bfs_in_queue = 0;
+		nodes->node->bfs_prev = NULL;
+		nodes = nodes->next;
 	}
-	delete_path(queue);
+	
+}
+
+t_list_of_nodes *bfs(t_node *start, t_node *end, t_lem *lem)
+{
+	t_list_of_nodes *queue = create_list_of_nodes(start);
+	reset_nodes_in_queue(lem->nodes, lem);
+	end->bfs_used = 0;
+	start->bfs_in_queue = 1;
+
+	while(queue)
+	{
+		t_node *node = pop_front(&queue);
+		// printf("got %s from queue\n", node->name);
+
+		if (node == end)
+		{
+			// printf("\tfound start\n");
+			delete_path(queue);
+			t_list_of_nodes *path = mark_path(end, lem);
+			// reset_nodes(lem->nodes, lem);
+			return (path);
+		}
+		
+		t_list_of_nodes *tmp = node->links;
+		while (tmp)
+		{
+			if (tmp->node->bfs_in_queue == 0 && tmp->node->bfs_used == 0)
+			{
+				add_node_to_list_back(&queue, tmp->node, lem);
+				tmp->node->bfs_in_queue = 1;
+				tmp->node->bfs_prev = node;
+				// printf("%s put %s to queue\n", node->name, tmp->node->name);
+			}
+			tmp = tmp->next;
+		}
+	}
+	return (NULL);
+}
+
+void reset_used_nodes(t_list_of_nodes *list, t_lem *lem)
+{
+	reset_nodes_in_queue(list, lem);
+	while (list)
+	{	
+		list->node->bfs_used = 0;
+		list = list->next;
+	}
 }
 
 int		main(void)
@@ -476,12 +471,15 @@ int		main(void)
 		error("The end room is missing", lem);
 
 	
+	t_list_of_nodes *path;
 
-	bfs(lem);
-
-	show_all_nodes(lem->nodes, lem);
-
-
+	while((path = bfs(lem->end, lem->start, lem)))
+	{
+		// show_all_nodes(lem->nodes, lem);
+		show_path(path);
+		delete_path(path);
+	}
+	
 	system("leaks lem-in");
 	return (0);
 }

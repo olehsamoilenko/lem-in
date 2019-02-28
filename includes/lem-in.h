@@ -21,10 +21,10 @@ typedef struct	s_node
 	struct s_list_of_nodes	*links;
 	int						x;
 	int						y;
-	int						bfs_dist;
+	// int						bfs_dist;
 	// int						bfs_marked;
 	struct s_node			*bfs_prev;
-	int						bfs_path_id;
+	// int						bfs_path_id;
 	int						bfs_used;
 	int						bfs_in_queue;
 }				t_node;
@@ -34,8 +34,7 @@ typedef struct	s_node
 **	links - list of pointers to linked rooms
 **	x - coordinate x
 **	y - coordinate y
-**	bfs_dist - distance from start to current node using breadth first search
-**	bfs_marked - flag for already used node in breadth first search
+
 */
 
 typedef struct	s_list_of_nodes
