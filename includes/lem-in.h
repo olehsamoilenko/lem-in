@@ -38,7 +38,7 @@ typedef struct	s_node
 typedef struct	s_list_of_nodes
 {
 	t_node					*node;
-	int						ants;
+	// int						ants;
 	struct s_list_of_nodes	*next;
 }				t_list_of_nodes;
 

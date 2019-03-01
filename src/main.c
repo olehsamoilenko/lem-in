@@ -157,7 +157,6 @@ void	show_path(t_list_of_nodes *path)
 		printf("Path is clear\n");
 		return;
 	}
-	printf("ants: %d\t\t", path->ants);
 	while (1)
 	{
 		printf("%s", path->node->name);
@@ -194,13 +193,15 @@ int		list_len(t_list_of_pathes *list)
 
 int		total_steps(t_list_of_pathes *list, t_lem *lem)
 {
-	int l = total_len(list);
-	int k = list_len(list);
+	// int l = total_len(list);
+	// int k = list_len(list);
 
-	int res = (lem->ants + l) / k - 1;
-	if ((lem->ants + l) % k != 0)
-		res += 1;
-	return (res);
+	// int res = (lem->ants + l) / k - 1;
+	// if ((lem->ants + l) % k != 0)
+	// 	res += 1;
+	// return (res);
+
+	return (-1);
 }
 
 void	show_all_pathes(t_list_of_pathes *list, t_lem *lem)
@@ -235,7 +236,7 @@ t_list_of_pathes *create_list_of_pathes(t_list_of_nodes *first_path)
 // void		check_parameters_equalness(t_node *node_1, t_node *node_2, t_lem *lem)
 // {
 // 	if (ft_strequ(node_1->name, node_2->name))
-// 		error("Room's name must be unique", lem);
+// 		error(, lem);
 // 	if (node_1->x == node_2->x && node_1->y == node_2->y)
 // 		error("Room's coordinates must be unique", lem);
 // }
@@ -324,6 +325,8 @@ t_node	*create_node(char *line, t_lem *lem)
 		error("Room definition example: 'name x y'", lem);
 	if (params[0][0] == 'L')
 		error("Room's name must not start with the character 'L'", lem);
+	if (params[0][0] == '#')
+		error("Room's name must not start with the character '#'", lem);
 	if (ft_char_count('-', params[0]) != 0)
 		error("Room's name must not contain the character '-'", lem);
 	
@@ -366,12 +369,10 @@ void	create_link(char *line, t_lem *lem)
 		push_node(&n2->links, n1, lem);
 }
 
-void	read_map(t_lem *lem)
+void	read_number_of_ants(char *line, t_lem *lem)
 {
-	char *line;
-	int mode = MAP_ROOMS_MODE;
-	
-	get_next_line_counter(GNL_READ_MODE, 0, &line);
+	while(get_next_line_counter(GNL_READ_MODE, 0, &line) && line[0] == '#')
+		ft_strdel(&line);
 	char *itoa = ft_itoa(ft_atoi(line));
 	if (ft_strequ(itoa, line) && ft_atoi(line) > 0)
 		lem->ants = ft_atoi(line);
@@ -379,40 +380,90 @@ void	read_map(t_lem *lem)
 		error("Number of ants must be a positive integer", lem);
 	ft_strdel(&itoa);
 	ft_strdel(&line);
+}
+
+int		name_is_unique(t_node *node, t_list_of_nodes *nodes)
+{
+	while (nodes)
+	{
+		if (ft_strequ(nodes->node->name, node->name))
+			return (0);
+		nodes = nodes->next;
+	}
+	return (1);
+}
+
+void	push_unique_room(t_node *node, t_lem *lem)
+{
+	if (name_is_unique(node, lem->nodes))
+		push_node(&lem->nodes, node, lem);
+	else
+		error("Room's name must be unique", lem);
+}
+
+void	handle_start_room(t_lem *lem)
+{
+	char *line;
+
+	// ft_strdel(&line);
+	get_next_line_counter(GNL_READ_MODE, 0, &line);
+	t_node *node = create_node(line, lem);
+	ft_strdel(&line);
+	
+	push_unique_room(node, lem);
+
+
+	if (lem->start != NULL)
+		error("Too much start rooms", lem);
+	lem->start = node;
+}
+
+void	handle_end_room(t_lem *lem)
+{
+	char *line;
+
+	get_next_line_counter(GNL_READ_MODE, 0, &line);
+	t_node *node = create_node(line, lem);
+	ft_strdel(&line);
+	push_unique_room(node, lem);
+	if (lem->end != NULL)
+		error("Too much end rooms", lem);
+	lem->end = node;
+}
+
+int		line_is_link(char *line)
+{
+	if(ft_strchr(line, '-') && ft_char_count(' ', line) == 0)
+		return (1);
+	else
+		return (0);
+
+}
+
+void	read_map(t_lem *lem)
+{
+	char *line;
+	int mode = MAP_ROOMS_MODE;
+	
+	read_number_of_ants(line, lem);
 	while (get_next_line_counter(GNL_READ_MODE, 0, &line))
 	{
 		if (ft_strequ(line, "##start"))
-		{
-			ft_strdel(&line);
-			get_next_line_counter(GNL_READ_MODE, 0, &line);
-			t_node *buf = create_node(line, lem);
-			push_node(&lem->nodes, buf, lem);
-			if (lem->start != NULL)
-				error("Too much start rooms", lem);
-			lem->start = buf;
-		}
+			handle_start_room(lem);
 		else if (ft_strequ(line, "##end"))
-		{
-			
-			ft_strdel(&line);
-			get_next_line_counter(GNL_READ_MODE, 0, &line);
-			t_node *buf = create_node(line, lem);
-			push_node(&lem->nodes, buf, lem);
-			if (lem->end != NULL)
-				error("Too much end rooms", lem);
-			lem->end = buf;
-		}
+			handle_end_room(lem);
 		else if (line[0] == '#')
-		{
-			// printf("%s skipped\n", line);
-		}
-		else if (mode == MAP_LINKS_MODE || ft_strchr(line, '-'))
+			;
+		else if (mode == MAP_LINKS_MODE || line_is_link(line))
 		{
 			create_link(line, lem);
 			mode = MAP_LINKS_MODE;
 		}
 		else if (mode == MAP_ROOMS_MODE)
-			push_node(&lem->nodes, create_node(line, lem), lem);
+		{
+			t_node *node = create_node(line, lem);
+			push_unique_room(node, lem);
+		}
 		ft_strdel(&line);
 	}
 }
@@ -431,16 +482,11 @@ t_node	*pop_node(t_list_of_nodes **list)
 
 void	mark_path(t_list_of_nodes *path)
 {
-	// t_list_of_nodes *path = NULL;
-
 	while (path)
 	{
-		// push_node(&path, node, lem);
 		path->node->bfs_used = 1;
-
 		path = path->next;
 	}
-	// return (path);
 }
 
 t_list_of_nodes *form_path(t_node *node, t_lem *lem)
@@ -450,7 +496,6 @@ t_list_of_nodes *form_path(t_node *node, t_lem *lem)
 	while (node)
 	{
 		push_node(&path, node, lem);
-		// node->bfs_used = 1;
 		node = node->bfs_prev;
 	}
 	return (path);
@@ -476,16 +521,11 @@ t_list_of_nodes *bfs(t_node *start, t_node *end, t_lem *lem)
 
 	while(queue)
 	{
-		
 		t_node *node = pop_node(&queue);
-		// printf("got %s from queue\n", node->name);
 		if (node == end)
 		{
-			// printf("\tfound start\n");
-			
 			t_list_of_nodes *path = form_path(end, lem);
 			mark_path(path);
-			// show_path(path);
 			delete_path(queue);
 			return (path);
 		}
@@ -498,14 +538,11 @@ t_list_of_nodes *bfs(t_node *start, t_node *end, t_lem *lem)
 				{
 					push_node(&queue, tmp->node, lem);
 					tmp->node->bfs_in_queue = 1;
-					tmp->node->bfs_prev = node;
-					// printf("%s put %s to queue\n", node->name, tmp->node->name);
+					tmp->node->bfs_prev = node;;
 				}
 				tmp = tmp->next;
 			}
 		}
-		
-		
 	}
 	return (NULL);
 }
@@ -520,10 +557,8 @@ t_list_of_nodes *bfs_less_links_oriented(t_node *start, t_node *end, t_lem *lem)
 	while(queue)
 	{
 		t_node *node = pop_node(&queue);
-		// printf("pop from queue:\t"); show_node(node, lem);
 		if (node == end)
 		{
-			// printf("\tfound start\n");
 			t_list_of_nodes *path = form_path(end, lem);
 			mark_path(path);
 			delete_path(queue);
@@ -542,15 +577,12 @@ t_list_of_nodes *bfs_less_links_oriented(t_node *start, t_node *end, t_lem *lem)
 						push_node(&queue, tmp->node, lem);
 						tmp->node->bfs_in_queue = 1;
 						tmp->node->bfs_prev = node;
-						// printf("%s put %s to queue\n", node->name, tmp->node->name);
 						node_pushed += 1;
 					}
 				}
 				tmp = tmp->next;
 			}
 		}
-		
-		
 	}
 	return (NULL);
 }
@@ -702,13 +734,56 @@ void	delete_list_of_ants(t_list_of_ants *ants)
 	
 }
 
+// void	new_ants(t_list_of_ants **ants, t_list_of_pathes *pathes, int *ant_counter, t_lem *lem)
+// {
+// 	while (pathes && *ant_counter <= lem->ants)
+// 	{
+// 		push_ant(ants, (*ant_counter)++, pathes->path, lem);
+// 		pathes = pathes->next;
+// 	}
+
+// }
+
+
 void	new_ants(t_list_of_ants **ants, t_list_of_pathes *pathes, int *ant_counter, t_lem *lem)
 {
-	while (pathes && *ant_counter <= lem->ants)
+	t_list_of_pathes *start = pathes;
+	while (pathes && lem->ants - *ant_counter != 0)
 	{
-		push_ant(ants, (*ant_counter)++, pathes->path, lem);
+		t_list_of_pathes *tmp = start;
+		int shorter_ways_sum = 0;
+		while (tmp != pathes)
+		{
+			shorter_ways_sum += path_len(pathes->path) - path_len(tmp->path);
+			tmp = tmp->next;
+		}
+
+		printf("ants: %d\n", lem->ants - *ant_counter);
+		if (lem->ants - *ant_counter > shorter_ways_sum)
+		{
+			
+			(*ant_counter)++;
+			push_ant(ants, *ant_counter, pathes->path, lem);
+
+
+			printf("\tused: ");
+			
+
+		}
+		else
+		{
+			printf("\tNOT USED: ");
+		}
+		show_path(pathes->path);
+		
+			
+		
+
 		pathes = pathes->next;
+		
 	}
+	pathes = start;
+	
 
 }
 
@@ -772,23 +847,20 @@ void	show_steps(t_list_of_ants *ants)
 }
 
 
-
 void	ants_contribution(t_list_of_pathes *pathes, t_lem *lem)
 {
 	t_list_of_ants *ants = NULL;
 
-	int ant_counter = 1;
+	int ant_counter = 0;
 
 	new_ants(&ants, pathes, &ant_counter, lem);
 	while (ants)
 	{
 		step(ants, lem);
-		// show_all_ants(ants);
-		show_steps(ants);
+		// show_steps(ants);
 		remove_finishers(&ants, lem);
 		new_ants(&ants, pathes, &ant_counter, lem);
 	}
-	
 	delete_list_of_ants(ants);
 }
 
@@ -814,21 +886,24 @@ int		main(void)
 	// show_all_pathes(lem->pathes_1, lem);
 	
 	reset_used_nodes(lem->nodes, lem);
-	sort_nodes_by_amount_of_links(lem->nodes);
+	// sort_nodes_by_amount_of_links(lem->nodes);
 
 	while ((path = bfs_less_links_oriented(lem->end, lem->start, lem)))
 		push_path(&lem->pathes_2, path);
 	// show_all_pathes(lem->pathes_2, lem);
+
+	if (!lem->pathes_1 && !lem->pathes_2)
+		error("Not enough data to process", lem);
 	
-	t_list_of_pathes *pathes;
-	if (total_steps(lem->pathes_1, lem) <= total_steps(lem->pathes_2, lem))
-		pathes = lem->pathes_1;
-	else
-		pathes = lem->pathes_2;
+	t_list_of_pathes *pathes = lem->pathes_1;
+	// if (total_steps(lem->pathes_1, lem) <= total_steps(lem->pathes_2, lem))
+	// 	pathes = lem->pathes_1;
+	// else
+	// 	pathes = lem->pathes_2;
 
 	show_all_pathes(pathes, lem);
+	// show_all_nodes(lem->nodes, lem);
 	
-
 	ants_contribution(pathes, lem);
 	
 	system("leaks lem-in");
