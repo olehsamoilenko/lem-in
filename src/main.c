@@ -59,7 +59,8 @@ t_lem	*init()
 {
 	t_lem *lem = ft_memalloc(sizeof(t_lem));
 	lem->nodes = NULL;
-	lem->pathes = NULL;
+	lem->pathes_1 = NULL;
+	lem->pathes_2 = NULL;
 	lem->start = NULL;
 	lem->end = NULL;
 	return (lem);
@@ -71,7 +72,10 @@ int		get_next_line_counter(int mode, int fd, char **line)
 	if (mode == GNL_READ_MODE)
 	{
 		count++;
-		return(get_next_line(fd, line));
+		int res = get_next_line(fd, line);
+		if (res)
+			printf("%s\n", *line);
+		return (res);
 	}
 	else if (mode == GNL_RETURN_COUNT_MODE)
 		return (count);
@@ -153,20 +157,55 @@ void	show_path(t_list_of_nodes *path)
 		printf("Path is clear\n");
 		return;
 	}
-	// printf("Length: %d\t", path_len(path));
+	printf("ants: %d\t\t", path->ants);
 	while (1)
 	{
-		printf("%s->", path->node->name);
+		printf("%s", path->node->name);
 		if (path->next == NULL)
 			break;
+		else
+			printf("->");
 		path = path->next;
-		
 	}
 	printf("\n");
 }
-void	show_all_pathes(t_list_of_pathes *list)
+
+int		total_len(t_list_of_pathes *list)
 {
-	printf("ALL PATHES:\n");
+	int len = 0;
+	while (list)
+	{
+		len += path_len(list->path);
+		list = list->next;
+	}
+	return (len);
+}
+
+int		list_len(t_list_of_pathes *list)
+{
+	int res = 0;
+	while (list)
+	{
+		res++;
+		list = list->next;
+	}
+	return (res);
+}
+
+int		total_steps(t_list_of_pathes *list, t_lem *lem)
+{
+	int l = total_len(list);
+	int k = list_len(list);
+
+	int res = (lem->ants + l) / k - 1;
+	if ((lem->ants + l) % k != 0)
+		res += 1;
+	return (res);
+}
+
+void	show_all_pathes(t_list_of_pathes *list, t_lem *lem)
+{
+	printf("ALL PATHES (total_steps = %d):\n", total_steps(list, lem));
 	t_list_of_pathes *start = list;
 	while (list)
 	{
@@ -201,7 +240,7 @@ t_list_of_pathes *create_list_of_pathes(t_list_of_nodes *first_path)
 // 		error("Room's coordinates must be unique", lem);
 // }
 
-void	add_node_to_list_back(t_list_of_nodes **list, t_node *node, t_lem *lem)
+void	push_node(t_list_of_nodes **list, t_node *node, t_lem *lem)
 {
 	
 	if (*list == NULL)
@@ -225,7 +264,7 @@ void	add_node_to_list_back(t_list_of_nodes **list, t_node *node, t_lem *lem)
 	}
 }
 
-void	add_path_to_list(t_list_of_pathes **list, t_list_of_nodes *path)
+void	push_path(t_list_of_pathes **list, t_list_of_nodes *path)
 {
 	if (*list == NULL)
 	{
@@ -250,7 +289,7 @@ t_list_of_nodes	*copy_list_of_nodes(t_list_of_nodes *path, t_lem *lem)
 	while (path != NULL)
 	{
 		
-		add_node_to_list_back(&new_path, path->node, lem);
+		push_node(&new_path, path->node, lem);
 		path = path->next;
 	}
 	// path = start;
@@ -294,6 +333,7 @@ t_node	*create_node(char *line, t_lem *lem)
 	node->bfs_used = 0;
 	node->bfs_in_queue = 0;
 	node->bfs_prev = NULL;
+	node->ant_id = 0;
 	itoa1 = ft_itoa(ft_atoi(params[1]));
 	itoa2 = ft_itoa(ft_atoi(params[2]));
 	if (ft_strequ(itoa1, params[1]) && ft_strequ(itoa2, params[2]))
@@ -321,9 +361,9 @@ void	create_link(char *line, t_lem *lem)
 	if (n1 == NULL || n2 == NULL)
 		error("Link contains an unknown room", lem);
 	if (!path_contains_node(n1->links, n2))
-		add_node_to_list_back(&n1->links, n2, lem);
+		push_node(&n1->links, n2, lem);
 	if (!path_contains_node(n2->links, n1))
-		add_node_to_list_back(&n2->links, n1, lem);
+		push_node(&n2->links, n1, lem);
 }
 
 void	read_map(t_lem *lem)
@@ -346,7 +386,7 @@ void	read_map(t_lem *lem)
 			ft_strdel(&line);
 			get_next_line_counter(GNL_READ_MODE, 0, &line);
 			t_node *buf = create_node(line, lem);
-			add_node_to_list_back(&lem->nodes, buf, lem);
+			push_node(&lem->nodes, buf, lem);
 			if (lem->start != NULL)
 				error("Too much start rooms", lem);
 			lem->start = buf;
@@ -357,7 +397,7 @@ void	read_map(t_lem *lem)
 			ft_strdel(&line);
 			get_next_line_counter(GNL_READ_MODE, 0, &line);
 			t_node *buf = create_node(line, lem);
-			add_node_to_list_back(&lem->nodes, buf, lem);
+			push_node(&lem->nodes, buf, lem);
 			if (lem->end != NULL)
 				error("Too much end rooms", lem);
 			lem->end = buf;
@@ -372,12 +412,12 @@ void	read_map(t_lem *lem)
 			mode = MAP_LINKS_MODE;
 		}
 		else if (mode == MAP_ROOMS_MODE)
-			add_node_to_list_back(&lem->nodes, create_node(line, lem), lem);
+			push_node(&lem->nodes, create_node(line, lem), lem);
 		ft_strdel(&line);
 	}
 }
 
-t_node	*pop_front(t_list_of_nodes **list)
+t_node	*pop_node(t_list_of_nodes **list)
 {
 	if (*list == NULL)
 		return (NULL);
@@ -389,14 +429,28 @@ t_node	*pop_front(t_list_of_nodes **list)
 	return (res);
 }
 
-t_list_of_nodes *mark_path(t_node *node, t_lem *lem)
+void	mark_path(t_list_of_nodes *path)
+{
+	// t_list_of_nodes *path = NULL;
+
+	while (path)
+	{
+		// push_node(&path, node, lem);
+		path->node->bfs_used = 1;
+
+		path = path->next;
+	}
+	// return (path);
+}
+
+t_list_of_nodes *form_path(t_node *node, t_lem *lem)
 {
 	t_list_of_nodes *path = NULL;
 
 	while (node)
 	{
-		add_node_to_list_back(&path, node, lem);
-		node->bfs_used = 1;
+		push_node(&path, node, lem);
+		// node->bfs_used = 1;
 		node = node->bfs_prev;
 	}
 	return (path);
@@ -422,33 +476,85 @@ t_list_of_nodes *bfs(t_node *start, t_node *end, t_lem *lem)
 
 	while(queue)
 	{
-		t_node *node = pop_front(&queue);
+		
+		t_node *node = pop_node(&queue);
 		// printf("got %s from queue\n", node->name);
-
 		if (node == end)
 		{
 			// printf("\tfound start\n");
+			
+			t_list_of_nodes *path = form_path(end, lem);
+			mark_path(path);
+			// show_path(path);
 			delete_path(queue);
-			t_list_of_nodes *path = mark_path(end, lem);
-			// reset_nodes(lem->nodes, lem);
 			return (path);
 		}
-		
-		t_list_of_nodes *tmp = node->links;
-		while (tmp)
+		else
 		{
-			if (tmp->node->bfs_in_queue == 0 && tmp->node->bfs_used == 0)
+			t_list_of_nodes *tmp = node->links;
+			while (tmp)
 			{
-				add_node_to_list_back(&queue, tmp->node, lem);
-				tmp->node->bfs_in_queue = 1;
-				tmp->node->bfs_prev = node;
-				// printf("%s put %s to queue\n", node->name, tmp->node->name);
+				if (tmp->node->bfs_in_queue == 0 && tmp->node->bfs_used == 0)
+				{
+					push_node(&queue, tmp->node, lem);
+					tmp->node->bfs_in_queue = 1;
+					tmp->node->bfs_prev = node;
+					// printf("%s put %s to queue\n", node->name, tmp->node->name);
+				}
+				tmp = tmp->next;
 			}
-			tmp = tmp->next;
 		}
+		
+		
 	}
 	return (NULL);
 }
+
+t_list_of_nodes *bfs_less_links_oriented(t_node *start, t_node *end, t_lem *lem)
+{
+	t_list_of_nodes *queue = create_list_of_nodes(start);
+	reset_nodes_in_queue(lem->nodes, lem);
+	end->bfs_used = 0;
+	start->bfs_in_queue = 1;
+
+	while(queue)
+	{
+		t_node *node = pop_node(&queue);
+		// printf("pop from queue:\t"); show_node(node, lem);
+		if (node == end)
+		{
+			// printf("\tfound start\n");
+			t_list_of_nodes *path = form_path(end, lem);
+			mark_path(path);
+			delete_path(queue);
+			return (path);
+		}
+		else
+		{
+			t_list_of_nodes *tmp = node->links;
+			int node_pushed = 0;
+			while (tmp)
+			{
+				if (tmp->node->bfs_in_queue == 0 && tmp->node->bfs_used == 0)
+				{
+					if (tmp->next != NULL || node_pushed == 0)
+					{
+						push_node(&queue, tmp->node, lem);
+						tmp->node->bfs_in_queue = 1;
+						tmp->node->bfs_prev = node;
+						// printf("%s put %s to queue\n", node->name, tmp->node->name);
+						node_pushed += 1;
+					}
+				}
+				tmp = tmp->next;
+			}
+		}
+		
+		
+	}
+	return (NULL);
+}
+
 
 void reset_used_nodes(t_list_of_nodes *list, t_lem *lem)
 {
@@ -460,25 +566,270 @@ void reset_used_nodes(t_list_of_nodes *list, t_lem *lem)
 	}
 }
 
+// sorting
+void	swap_links(t_node **link_1, t_node **link_2)
+{
+	t_node *tmp = *link_1;
+	*link_1 = *link_2;
+	*link_2 = tmp;
+}
+void	sort_links(t_list_of_nodes *nodes)
+{
+	if (!nodes)
+		return;
+	t_list_of_nodes *tmp = nodes;
+	while (tmp)
+	{
+		t_list_of_nodes *start = nodes;
+		while (start->next)
+		{
+			if (path_len(start->node->links) > path_len(start->next->node->links))
+				swap_links(&start->node, &start->next->node);
+			start = start->next;
+		}
+		tmp = tmp->next;
+	}
+}
+void	sort_nodes_by_amount_of_links(t_list_of_nodes *nodes)
+{
+	while (nodes)
+	{
+		sort_links(nodes->node->links);
+		nodes = nodes->next;
+	}
+}
+// sorting
+
+void	remove_node(t_list_of_nodes **list, t_node *node)
+{
+	t_list_of_nodes *tmp;
+	
+	if ((*list)->node == node)
+	{
+		tmp = *list;
+		*list = (*list)->next;
+	}
+	else
+	{
+		t_list_of_nodes *start = *list;
+		while ((*list)->next)
+		{
+			if ((*list)->next->node == node)
+			{
+				tmp = (*list)->next;
+				(*list)->next = (*list)->next->next;
+				break;
+			}
+			*list = (*list)->next;
+		}
+		*list = start;
+	}
+	free(tmp);
+}
+
+void	start_to_end_handle(t_lem *lem)
+{
+	if (path_contains_node(lem->start->links, lem->end))
+	{
+		t_list_of_nodes *path = NULL;
+		push_node(&path, lem->start, lem);
+		push_node(&path, lem->end, lem);
+		push_path(&lem->pathes_1, path);
+		push_path(&lem->pathes_2, path);
+		remove_node(&lem->start->links, lem->end);
+		remove_node(&lem->end->links, lem->start);
+	}
+}
+
+t_list_of_ants	*create_list_of_ants(int num, t_list_of_nodes *ant_position)
+{
+	t_list_of_ants *ants = ft_memalloc(sizeof(t_list_of_ants));
+	ants->ant_id = num;
+	ants->position = ant_position;
+	ants->next = NULL;
+	return (ants);
+}
+
+void	show_all_ants(t_list_of_ants *ants)
+{
+	while (ants)
+	{
+		printf("id: %d\tposition: %s\n", ants->ant_id, ants->position->node->name);
+		ants = ants->next;
+	}
+	printf("\n");
+}
+
+void	push_ant(t_list_of_ants **ants, int num, t_list_of_nodes *ant_position, t_lem *lem)
+{
+	if (*ants == NULL)
+		*ants = create_list_of_ants(num, ant_position);
+	else
+	{
+		t_list_of_ants *start = *ants;
+
+		while ((*ants)->next != NULL)
+		{
+			
+			// check_parameters_equalness((*list)->node, node, lem);
+			*ants = (*ants)->next;
+		}
+		// check_parameters_equalness((*list)->node, node, lem);
+	
+		(*ants)->next = ft_memalloc(sizeof(t_list_of_ants));
+		(*ants)->next->ant_id = num;
+		(*ants)->next->position = ant_position;
+		(*ants)->next->next = NULL;
+		*ants = start; // fix
+	}
+}
+
+void	delete_list_of_ants(t_list_of_ants *ants)
+{
+	t_list_of_ants *start = ants; // ?
+	if (ants == NULL)
+		return;
+	while ((ants)->next != NULL)
+	{
+		while ((ants)->next->next != NULL)
+			ants = (ants)->next;
+		free((ants)->next);
+		(ants)->next = NULL;
+		ants = start;
+	}
+	free(ants);
+	// path = NULL;
+	
+}
+
+void	new_ants(t_list_of_ants **ants, t_list_of_pathes *pathes, int *ant_counter, t_lem *lem)
+{
+	while (pathes && *ant_counter <= lem->ants)
+	{
+		push_ant(ants, (*ant_counter)++, pathes->path, lem);
+		pathes = pathes->next;
+	}
+
+}
+
+void	step(t_list_of_ants *ants, t_lem *lem)
+{
+	t_list_of_ants *buf = ants;
+	while (buf)
+	{
+		buf->position = buf->position->next;
+		buf = buf->next;
+	}
+}
+
+
+void	remove_ant(t_list_of_ants **ants, t_list_of_ants *ant)
+{
+	t_list_of_ants *tmp;
+	
+	if (*ants == ant)
+	{
+		tmp = *ants;
+		*ants = (*ants)->next;
+	}
+	else
+	{
+		t_list_of_ants *start = *ants;
+		while ((*ants)->next)
+		{
+			if ((*ants)->next == ant)
+			{
+				tmp = (*ants)->next;
+				(*ants)->next = (*ants)->next->next;
+				break;
+			}
+			*ants = (*ants)->next;
+		}
+		*ants = start;
+	}
+	free(tmp);
+}
+
+void	remove_finishers(t_list_of_ants **ants, t_lem *lem)
+{
+	t_list_of_ants *tmp = *ants;
+	while (tmp)
+	{
+		if (tmp->position->node == lem->end)
+			remove_ant(ants, tmp);
+		tmp = tmp->next;
+	}
+}
+
+void	show_steps(t_list_of_ants *ants)
+{
+	while (ants)
+	{
+		printf("L%d-%s ", ants->ant_id, ants->position->node->name);
+		ants = ants->next;
+	}
+	printf("\n");
+}
+
+
+
+void	ants_contribution(t_list_of_pathes *pathes, t_lem *lem)
+{
+	t_list_of_ants *ants = NULL;
+
+	int ant_counter = 1;
+
+	new_ants(&ants, pathes, &ant_counter, lem);
+	while (ants)
+	{
+		step(ants, lem);
+		// show_all_ants(ants);
+		show_steps(ants);
+		remove_finishers(&ants, lem);
+		new_ants(&ants, pathes, &ant_counter, lem);
+	}
+	
+	delete_list_of_ants(ants);
+}
+
 int		main(void)
 {
 	t_lem *lem = init();
 	read_map(lem);
+	printf("\n");
 
 	if (lem->start == NULL)
 		error("The start room is missing", lem);
 	if (lem->end == NULL)
 		error("The end room is missing", lem);
 
-	
-	t_list_of_nodes *path;
 
-	while((path = bfs(lem->end, lem->start, lem)))
-	{
-		// show_all_nodes(lem->nodes, lem);
-		show_path(path);
-		delete_path(path);
-	}
+	
+	start_to_end_handle(lem);
+
+
+	t_list_of_nodes *path;
+	while ((path = bfs(lem->end, lem->start, lem)))
+		push_path(&lem->pathes_1, path);
+	// show_all_pathes(lem->pathes_1, lem);
+	
+	reset_used_nodes(lem->nodes, lem);
+	sort_nodes_by_amount_of_links(lem->nodes);
+
+	while ((path = bfs_less_links_oriented(lem->end, lem->start, lem)))
+		push_path(&lem->pathes_2, path);
+	// show_all_pathes(lem->pathes_2, lem);
+	
+	t_list_of_pathes *pathes;
+	if (total_steps(lem->pathes_1, lem) <= total_steps(lem->pathes_2, lem))
+		pathes = lem->pathes_1;
+	else
+		pathes = lem->pathes_2;
+
+	show_all_pathes(pathes, lem);
+	
+
+	ants_contribution(pathes, lem);
 	
 	system("leaks lem-in");
 	return (0);

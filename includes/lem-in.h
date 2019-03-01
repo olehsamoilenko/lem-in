@@ -21,12 +21,10 @@ typedef struct	s_node
 	struct s_list_of_nodes	*links;
 	int						x;
 	int						y;
-	// int						bfs_dist;
-	// int						bfs_marked;
 	struct s_node			*bfs_prev;
-	// int						bfs_path_id;
 	int						bfs_used;
 	int						bfs_in_queue;
+	int						ant_id;
 }				t_node;
 
 /*
@@ -40,7 +38,7 @@ typedef struct	s_node
 typedef struct	s_list_of_nodes
 {
 	t_node					*node;
-	// int						group;
+	int						ants;
 	struct s_list_of_nodes	*next;
 }				t_list_of_nodes;
 
@@ -48,6 +46,7 @@ typedef struct	s_list_of_nodes
 	node - pointer to a node
 	group - pathes of the same group can be used together
 	next - pointer to the next element of the list
+
 */
 
 typedef struct	s_list_of_pathes
@@ -67,7 +66,8 @@ typedef struct	s_lem
 	t_list_of_nodes			*nodes;
 	t_node					*start;
 	t_node					*end;
-	t_list_of_pathes		*pathes;
+	t_list_of_pathes		*pathes_1;
+	t_list_of_pathes		*pathes_2;
 }				t_lem;
 
 /*
@@ -77,5 +77,13 @@ typedef struct	s_lem
 	end - poiner to the end node
 	pathes - list of start to end possible ways
 */
+
+typedef struct	s_list_of_ants
+{
+	int						ant_id;
+	t_list_of_nodes			*position;
+	struct s_list_of_ants	*next;
+}				t_list_of_ants;
+
 
 #endif
