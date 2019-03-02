@@ -15,7 +15,12 @@ INC =			-I ./includes \
 				-I ./libft/includes
 LIB =			-lft -L ./libft
 FLAGS =			#-Wall -Wextra -Werror
-LIST =			main
+LIST =			main \
+				read \
+				show_DELETE \
+				utils \
+				node \
+				link
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 all: $(NAME)

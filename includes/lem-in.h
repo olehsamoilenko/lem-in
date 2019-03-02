@@ -14,6 +14,12 @@
 # define LEM_IN_H
 
 # include "libft.h"
+#include <stdio.h>
+
+#define MAP_ROOMS_MODE 0
+#define MAP_LINKS_MODE 1
+#define GNL_READ_MODE 0
+#define GNL_RETURN_COUNT_MODE 1
 
 typedef struct	s_node
 {
@@ -84,6 +90,27 @@ typedef struct	s_list_of_ants
 	t_list_of_nodes			*position;
 	struct s_list_of_ants	*next;
 }				t_list_of_ants;
+
+// read.c
+void	read_map(t_lem *lem);
+
+// main.c
+
+// utils.c
+int		get_next_line_counter(int mode, int fd, char **line);
+void	error(char *message, t_lem *lem);
+
+// DELETE
+void	show_all_nodes(t_list_of_nodes *list, t_lem *lem);
+
+// node
+t_node			*create_node(char *line, t_lem *lem);
+void			push_node(t_list_of_nodes **list, t_node *node, t_lem *lem);
+t_list_of_nodes	*create_list_of_nodes(t_node *first_node);
+
+//link
+int		path_contains_node(t_list_of_nodes *path, t_node *node); //rename
+void	create_link(char *line, t_lem *lem);
 
 
 #endif

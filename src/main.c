@@ -11,49 +11,6 @@
 /* ************************************************************************** */
 
 #include "lem-in.h"
-#include <stdio.h>
-
-#define MAP_ROOMS_MODE 0
-#define MAP_LINKS_MODE 1
-#define GNL_READ_MODE 0
-#define GNL_RETURN_COUNT_MODE 1
-
-void	show_node(t_node *node, t_lem *lem)
-{
-	if (lem->start == node)
-		printf("START:");
-	else if (lem->end == node)
-		printf("END:");
-	printf("\tname: %s,\t", node->name);
-	if (node->bfs_prev == NULL)
-		printf("prev: -,");
-	else
-		printf("prev: %s,", node->bfs_prev->name);
-	printf("\tin_queue: %d,\tbfs_used: %d,\tlinks: ",
-		node->bfs_in_queue, node->bfs_used);
-
-	
-	t_list_of_nodes *start = node->links;
-	while (node->links)
-	{
-		printf("%s ", node->links->node->name);
-		node->links = node->links->next;
-	}
-	node->links = start;
-	printf("\n");
-}
-void	show_all_nodes(t_list_of_nodes *list, t_lem *lem)
-{
-	printf("ALL NODES:\n");
-	t_list_of_nodes *start = list;
-	while (list)
-	{
-		show_node(list->node, lem);
-		list = list->next;
-	}
-	list = start;
-	printf("\n");
-}
 
 t_lem	*init()
 {
@@ -66,77 +23,11 @@ t_lem	*init()
 	return (lem);
 }
 
-int		get_next_line_counter(int mode, int fd, char **line)
-{
-	static int count = 0;
-	if (mode == GNL_READ_MODE)
-	{
-		count++;
-		int res = get_next_line(fd, line);
-		if (res)
-			printf("%s\n", *line);
-		return (res);
-	}
-	else if (mode == GNL_RETURN_COUNT_MODE)
-		return (count);
-	else return (0);
-}
 
-void	error(char *message, t_lem *lem)
-{
-	ft_printf("ERROR line %d: %s\n",
-		get_next_line_counter(GNL_RETURN_COUNT_MODE, 0, NULL), message);
-	show_all_nodes(lem->nodes, lem);
-	system("leaks lem-in");
-	exit(0);
-}
 
-int		ft_arrlen(char **arr)
-{
-	int i = 0;
-	if (arr == NULL)
-		return (0);
-	while (arr[i])
-		i++;
-	return (i);
-}
 
-int		ft_char_count(char c, char *line)
-{
-	int i = -1;
-	int res = 0;
-	while (line[++i])
-	{
-		if (line[i] == c)
-			res++;
-	}
-	return (res);
-}
 
-int		path_contains_node(t_list_of_nodes *path, t_node *node) //rename
-{
-	while (path != NULL)
-	{
-		if (path->node == node)
-			return (1);
-		path = path->next;
-	}
-	return (0);
-}
 
-t_node	*find_node(char *name, t_list_of_nodes *nodes) // rename
-{
-	int i = -1;
-	// t_list_of_nodes *start = nodes;
-	while (nodes)
-	{
-		if (ft_strequ(name, nodes->node->name))
-			return (nodes->node);
-		nodes = nodes->next;
-	}
-	// nodes = start;
-	return (NULL);
-}
 
 int		path_len(t_list_of_nodes *list)
 {
@@ -220,13 +111,7 @@ void	show_all_pathes(t_list_of_pathes *list, t_lem *lem)
 	printf("\n");
 }
 
-t_list_of_nodes	*create_list_of_nodes(t_node *first_node)
-{
-	t_list_of_nodes *list = ft_memalloc(sizeof(t_list_of_nodes));
-	list->node = first_node;
-	list->next = NULL;
-	return (list);
-}
+
 
 t_list_of_pathes *create_list_of_pathes(t_list_of_nodes *first_path)
 {
@@ -236,37 +121,7 @@ t_list_of_pathes *create_list_of_pathes(t_list_of_nodes *first_path)
 	return (list);
 }
 
-// void		check_parameters_equalness(t_node *node_1, t_node *node_2, t_lem *lem)
-// {
-// 	if (ft_strequ(node_1->name, node_2->name))
-// 		error(, lem);
-// 	if (node_1->x == node_2->x && node_1->y == node_2->y)
-// 		error("Room's coordinates must be unique", lem);
-// }
 
-void	push_node(t_list_of_nodes **list, t_node *node, t_lem *lem)
-{
-	
-	if (*list == NULL)
-		*list = create_list_of_nodes(node);
-	else
-	{
-		t_list_of_nodes *start = *list;
-
-		while ((*list)->next != NULL)
-		{
-			
-			// check_parameters_equalness((*list)->node, node, lem);
-			*list = (*list)->next;
-		}
-		// check_parameters_equalness((*list)->node, node, lem);
-	
-		(*list)->next = ft_memalloc(sizeof(t_list_of_nodes));
-		(*list)->next->node = node;
-		(*list)->next->next = NULL;
-		*list = start;
-	}
-}
 
 void	push_path(t_list_of_pathes **list, t_list_of_nodes *path)
 {
@@ -318,158 +173,6 @@ void	delete_path(t_list_of_nodes *path)
 	
 }
 
-t_node	*create_node(char *line, t_lem *lem)
-{
-	char *itoa1;
-	char *itoa2;
-	char **params = ft_strsplit(line, ' ');
-
-	if (ft_arrlen(params) != 3 || ft_char_count(' ', line) != 2)
-		error("Room definition example: 'name x y'", lem);
-	if (params[0][0] == 'L')
-		error("Room's name must not start with the character 'L'", lem);
-	if (params[0][0] == '#')
-		error("Room's name must not start with the character '#'", lem);
-	if (ft_char_count('-', params[0]) != 0)
-		error("Room's name must not contain the character '-'", lem);
-	
-
-	t_node	*node = ft_memalloc(sizeof(t_node));
-	node->name = ft_strdup(params[0]);
-	node->bfs_used = 0;
-	node->bfs_in_queue = 0;
-	node->bfs_prev = NULL;
-	node->ant_id = 0;
-	itoa1 = ft_itoa(ft_atoi(params[1]));
-	itoa2 = ft_itoa(ft_atoi(params[2]));
-	if (ft_strequ(itoa1, params[1]) && ft_strequ(itoa2, params[2]))
-	{
-		node->x = ft_atoi(params[1]);
-		node->y = ft_atoi(params[2]);
-	}
-	else
-		error("Room's coordinates must be integers", lem);
-	ft_strdel(&itoa1);
-	ft_strdel(&itoa2);
-	node->links = NULL;
-	ft_arrclr(params);
-	return (node);
-}
-
-void	create_link(char *line, t_lem *lem)
-{
-	char **params = ft_strsplit(line, '-');
-	if (ft_char_count(' ', line) != 0 || ft_arrlen(params) != 2)
-		error("Link definition example: room_1-room_2", lem);
-	t_node *n1 = find_node(params[0], lem->nodes);
-	t_node *n2 = find_node(params[1], lem->nodes);
-	ft_arrclr(params);
-	if (n1 == NULL || n2 == NULL)
-		error("Link contains an unknown room", lem);
-	if (!path_contains_node(n1->links, n2))
-		push_node(&n1->links, n2, lem);
-	if (!path_contains_node(n2->links, n1))
-		push_node(&n2->links, n1, lem);
-}
-
-void	read_number_of_ants(char *line, t_lem *lem)
-{
-	while(get_next_line_counter(GNL_READ_MODE, 0, &line) && line[0] == '#')
-		ft_strdel(&line);
-	char *itoa = ft_itoa(ft_atoi(line));
-	if (ft_strequ(itoa, line) && ft_atoi(line) > 0)
-		lem->ants = ft_atoi(line);
-	else
-		error("Number of ants must be a positive integer", lem);
-	ft_strdel(&itoa);
-	ft_strdel(&line);
-}
-
-int		name_is_unique(t_node *node, t_list_of_nodes *nodes)
-{
-	while (nodes)
-	{
-		if (ft_strequ(nodes->node->name, node->name))
-			return (0);
-		nodes = nodes->next;
-	}
-	return (1);
-}
-
-void	push_unique_room(t_node *node, t_lem *lem)
-{
-	if (name_is_unique(node, lem->nodes))
-		push_node(&lem->nodes, node, lem);
-	else
-		error("Room's name must be unique", lem);
-}
-
-void	handle_start_room(t_lem *lem)
-{
-	char *line;
-
-	// ft_strdel(&line);
-	get_next_line_counter(GNL_READ_MODE, 0, &line);
-	t_node *node = create_node(line, lem);
-	ft_strdel(&line);
-	
-	push_unique_room(node, lem);
-
-
-	if (lem->start != NULL)
-		error("Too much start rooms", lem);
-	lem->start = node;
-}
-
-void	handle_end_room(t_lem *lem)
-{
-	char *line;
-
-	get_next_line_counter(GNL_READ_MODE, 0, &line);
-	t_node *node = create_node(line, lem);
-	ft_strdel(&line);
-	push_unique_room(node, lem);
-	if (lem->end != NULL)
-		error("Too much end rooms", lem);
-	lem->end = node;
-}
-
-int		line_is_link(char *line)
-{
-	if(ft_strchr(line, '-') && ft_char_count(' ', line) == 0)
-		return (1);
-	else
-		return (0);
-
-}
-
-void	read_map(t_lem *lem)
-{
-	char *line;
-	int mode = MAP_ROOMS_MODE;
-	
-	read_number_of_ants(line, lem);
-	while (get_next_line_counter(GNL_READ_MODE, 0, &line))
-	{
-		if (ft_strequ(line, "##start"))
-			handle_start_room(lem);
-		else if (ft_strequ(line, "##end"))
-			handle_end_room(lem);
-		else if (line[0] == '#')
-			;
-		else if (mode == MAP_LINKS_MODE || line_is_link(line))
-		{
-			create_link(line, lem);
-			mode = MAP_LINKS_MODE;
-		}
-		else if (mode == MAP_ROOMS_MODE)
-		{
-			t_node *node = create_node(line, lem);
-			push_unique_room(node, lem);
-		}
-		ft_strdel(&line);
-	}
-}
 
 t_node	*pop_node(t_list_of_nodes **list)
 {
@@ -517,7 +220,7 @@ void reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem)
 
 t_list_of_nodes *bfs(t_node *start, t_node *end, t_lem *lem)
 {
-	t_list_of_nodes *queue = create_list_of_nodes(start);
+	t_list_of_nodes *queue = create_list_of_nodes(start); // mb node_push ?
 	reset_nodes_in_queue(lem->nodes, lem);
 	end->bfs_used = 0;
 	start->bfs_in_queue = 1;
