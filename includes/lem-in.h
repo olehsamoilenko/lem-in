@@ -21,6 +21,14 @@
 #define GNL_READ_MODE 0
 #define GNL_RETURN_COUNT_MODE 1
 
+#define DEFAULT "\033[0m"
+#define RED "\033[0;31m"
+#define GREEN "\033[0;32m"
+// #define BLUE "\033[0;34m"
+#define YELLOW "\033[0;33m"
+#define PURPLE "\033[0;35m"
+#define CYAN "\033[0;36m"
+
 typedef struct	s_node
 {
 	char					*name;
@@ -30,7 +38,6 @@ typedef struct	s_node
 	struct s_node			*bfs_prev;
 	int						bfs_used;
 	int						bfs_in_queue;
-	int						ant_id;
 }				t_node;
 
 /*
@@ -44,7 +51,6 @@ typedef struct	s_node
 typedef struct	s_list_of_nodes
 {
 	t_node					*node;
-	// int						ants;
 	struct s_list_of_nodes	*next;
 }				t_list_of_nodes;
 
@@ -74,6 +80,7 @@ typedef struct	s_lem
 	t_node					*end;
 	t_list_of_pathes		*pathes_1;
 	t_list_of_pathes		*pathes_2;
+	int						flag_color;
 }				t_lem;
 
 /*
@@ -96,21 +103,44 @@ void	read_map(t_lem *lem);
 
 // main.c
 
+
 // utils.c
 int		get_next_line_counter(int mode, int fd, char **line);
 void	error(char *message, t_lem *lem);
+int		total_steps(t_list_of_pathes *list, t_lem *lem);
 
 // DELETE
 void	show_all_nodes(t_list_of_nodes *list, t_lem *lem);
+void	show_all_pathes(t_list_of_pathes *list, t_lem *lem);
 
 // node
 t_node			*create_node(char *line, t_lem *lem);
 void			push_node(t_list_of_nodes **list, t_node *node, t_lem *lem);
 t_list_of_nodes	*create_list_of_nodes(t_node *first_node);
+t_node	*pop_node(t_list_of_nodes **list);
 
 //link
 int		path_contains_node(t_list_of_nodes *path, t_node *node); //rename
 void	create_link(char *line, t_lem *lem);
 
+//path
+int		path_len(t_list_of_nodes *list);
+void	delete_path(t_list_of_nodes *path);
+
+// print
+void	print_steps(t_list_of_pathes *pathes, t_lem *lem);
+
+// ant
+void	push_ant(t_list_of_ants **ants, int num, t_list_of_nodes *ant_position, t_lem *lem);
+void	delete_list_of_ants(t_list_of_ants *ants);
+
+// list
+int		total_len(t_list_of_pathes *list);
+int		list_len(t_list_of_pathes *list);
+
+// bfs
+t_list_of_nodes *bfs(t_node *start, t_node *end, t_lem *lem);
+t_list_of_nodes *bfs_less_links_oriented(t_node *start, t_node *end, t_lem *lem);
+void reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem);
 
 #endif

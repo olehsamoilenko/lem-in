@@ -15,7 +15,17 @@
 static void	read_number_of_ants(char *line, t_lem *lem)
 {
 	while(get_next_line_counter(GNL_READ_MODE, 0, &line) && line[0] == '#')
+	{
+		if (ft_strequ(line, "##start"))
+			error("There is start command before number of ants", lem);
+			
+		if (ft_strequ(line, "##end"))
+			error("There is end command before number of ants", lem);
+
 		ft_strdel(&line);
+	}
+	if (!line)
+		error("Number of ants is missing", lem);
 	char *itoa = ft_itoa(ft_atoi(line));
 	if (ft_strequ(itoa, line) && ft_atoi(line) > 0)
 		lem->ants = ft_atoi(line);

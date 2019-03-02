@@ -20,7 +20,12 @@ LIST =			main \
 				show_DELETE \
 				utils \
 				node \
-				link
+				link \
+				print \
+				path \
+				ant \
+				list \
+				bfs
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 all: $(NAME)

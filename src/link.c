@@ -47,8 +47,17 @@ void	create_link(char *line, t_lem *lem)
 	ft_arrclr(params);
 	if (n1 == NULL || n2 == NULL)
 		error("Link contains an unknown room", lem);
-	if (!path_contains_node(n1->links, n2))
+	if (n1 == n2)
+		error("Self-loops are forbidden", lem);
+	if (!path_contains_node(n1->links, n2) && !path_contains_node(n2->links, n1))
+	{
 		push_node(&n1->links, n2, lem);
-	if (!path_contains_node(n2->links, n1))
 		push_node(&n2->links, n1, lem);
+	}
+	else
+	{
+		error("Link duplication is forbidden", lem);
+	}
+	
+		
 }

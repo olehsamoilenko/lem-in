@@ -39,6 +39,18 @@ void	push_node(t_list_of_nodes **list, t_node *node, t_lem *lem)
 	}
 }
 
+t_node	*pop_node(t_list_of_nodes **list)
+{
+	if (*list == NULL)
+		return (NULL);
+	t_node *res = (*list)->node;
+	t_list_of_nodes *erase = *list;
+	*list = (*list)->next;
+	free(erase);
+	erase = NULL;
+	return (res);
+}
+
 t_node	*create_node(char *line, t_lem *lem)
 {
 	char *itoa1;
@@ -60,7 +72,6 @@ t_node	*create_node(char *line, t_lem *lem)
 	node->bfs_used = 0;
 	node->bfs_in_queue = 0;
 	node->bfs_prev = NULL;
-	node->ant_id = 0;
 	itoa1 = ft_itoa(ft_atoi(params[1]));
 	itoa2 = ft_itoa(ft_atoi(params[2]));
 	if (ft_strequ(itoa1, params[1]) && ft_strequ(itoa2, params[2]))
