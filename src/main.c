@@ -758,23 +758,19 @@ void	new_ants(t_list_of_ants **ants, t_list_of_pathes *pathes, int *ant_counter,
 			tmp = tmp->next;
 		}
 
-		printf("ants: %d\n", lem->ants - *ant_counter);
+		// printf("ants: %d\n", lem->ants - *ant_counter);
 		if (lem->ants - *ant_counter > shorter_ways_sum)
 		{
 			
 			(*ant_counter)++;
+
+			// printf("\t%d choose ", *ant_counter); show_path(pathes->path);
+
 			push_ant(ants, *ant_counter, pathes->path, lem);
 
 
-			printf("\tused: ");
-			
+		}
 
-		}
-		else
-		{
-			printf("\tNOT USED: ");
-		}
-		show_path(pathes->path);
 		
 			
 		
@@ -857,7 +853,9 @@ void	ants_contribution(t_list_of_pathes *pathes, t_lem *lem)
 	while (ants)
 	{
 		step(ants, lem);
-		// show_steps(ants);
+
+		show_steps(ants);
+
 		remove_finishers(&ants, lem);
 		new_ants(&ants, pathes, &ant_counter, lem);
 	}
@@ -901,11 +899,11 @@ int		main(void)
 	// else
 	// 	pathes = lem->pathes_2;
 
-	show_all_pathes(pathes, lem);
+	// show_all_pathes(pathes, lem);
 	// show_all_nodes(lem->nodes, lem);
 	
 	ants_contribution(pathes, lem);
 	
-	system("leaks lem-in");
+	// system("leaks lem-in");
 	return (0);
 }
