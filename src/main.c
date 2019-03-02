@@ -113,7 +113,7 @@ int		ft_char_count(char c, char *line)
 	return (res);
 }
 
-int		path_contains_node(t_list_of_nodes *path, t_node *node)
+int		path_contains_node(t_list_of_nodes *path, t_node *node) //rename
 {
 	while (path != NULL)
 	{
@@ -124,7 +124,7 @@ int		path_contains_node(t_list_of_nodes *path, t_node *node)
 	return (0);
 }
 
-t_node	*find_node(char *name, t_list_of_nodes *nodes)
+t_node	*find_node(char *name, t_list_of_nodes *nodes) // rename
 {
 	int i = -1;
 	// t_list_of_nodes *start = nodes;
@@ -193,15 +193,18 @@ int		list_len(t_list_of_pathes *list)
 
 int		total_steps(t_list_of_pathes *list, t_lem *lem)
 {
-	// int l = total_len(list);
-	// int k = list_len(list);
+	int l = total_len(list);
+	int k = list_len(list);
 
-	// int res = (lem->ants + l) / k - 1;
-	// if ((lem->ants + l) % k != 0)
-	// 	res += 1;
-	// return (res);
+	if (k == 0)
+		return (__INT_MAX__);
 
-	return (-1);
+	int res = (lem->ants + l) / k - 1;
+	if ((lem->ants + l) % k != 0)
+		res += 1;
+	return (res);
+
+	// return (-1);
 }
 
 void	show_all_pathes(t_list_of_pathes *list, t_lem *lem)
@@ -519,6 +522,8 @@ t_list_of_nodes *bfs(t_node *start, t_node *end, t_lem *lem)
 	end->bfs_used = 0;
 	start->bfs_in_queue = 1;
 
+	// show_all_nodes(lem->nodes, lem);
+
 	while(queue)
 	{
 		t_node *node = pop_node(&queue);
@@ -551,9 +556,9 @@ t_list_of_nodes *bfs_less_links_oriented(t_node *start, t_node *end, t_lem *lem)
 {
 	t_list_of_nodes *queue = create_list_of_nodes(start);
 	reset_nodes_in_queue(lem->nodes, lem);
+
 	end->bfs_used = 0;
 	start->bfs_in_queue = 1;
-
 	while(queue)
 	{
 		t_node *node = pop_node(&queue);
@@ -562,6 +567,7 @@ t_list_of_nodes *bfs_less_links_oriented(t_node *start, t_node *end, t_lem *lem)
 			t_list_of_nodes *path = form_path(end, lem);
 			mark_path(path);
 			delete_path(queue);
+
 			return (path);
 		}
 		else
@@ -572,13 +578,23 @@ t_list_of_nodes *bfs_less_links_oriented(t_node *start, t_node *end, t_lem *lem)
 			{
 				if (tmp->node->bfs_in_queue == 0 && tmp->node->bfs_used == 0)
 				{
-					if (tmp->next != NULL || node_pushed == 0)
+					// printf("%s\n", tmp->node->name);
+					if (tmp->next == NULL && node_pushed != 0)
+					{
+						// printf("%s skipped\n", tmp->next->node->name);
+					}
+					else
 					{
 						push_node(&queue, tmp->node, lem);
+
 						tmp->node->bfs_in_queue = 1;
 						tmp->node->bfs_prev = node;
-						node_pushed += 1;
+						
+						if (tmp->node->links->node != node) ////// work ?????????????
+							node_pushed += 1;
 					}
+					if (tmp->node == end)
+						break;
 				}
 				tmp = tmp->next;
 			}
@@ -605,7 +621,7 @@ void	swap_links(t_node **link_1, t_node **link_2)
 	*link_1 = *link_2;
 	*link_2 = tmp;
 }
-void	sort_links(t_list_of_nodes *nodes)
+void	sort_links(t_list_of_nodes *nodes, t_lem *lem)
 {
 	if (!nodes)
 		return;
@@ -617,16 +633,17 @@ void	sort_links(t_list_of_nodes *nodes)
 		{
 			if (path_len(start->node->links) > path_len(start->next->node->links))
 				swap_links(&start->node, &start->next->node);
+			// if (start->next->node ==)
 			start = start->next;
 		}
 		tmp = tmp->next;
 	}
 }
-void	sort_nodes_by_amount_of_links(t_list_of_nodes *nodes)
+void	sort_nodes_by_amount_of_links(t_list_of_nodes *nodes, t_lem *lem)
 {
 	while (nodes)
 	{
-		sort_links(nodes->node->links);
+		sort_links(nodes->node->links, lem);
 		nodes = nodes->next;
 	}
 }
@@ -862,6 +879,31 @@ void	ants_contribution(t_list_of_pathes *pathes, t_lem *lem)
 	delete_list_of_ants(ants);
 }
 
+// sorting
+void	swap_lists(t_list_of_nodes **path_1, t_list_of_nodes **path_2)
+{
+	t_list_of_nodes *tmp = *path_1;
+	*path_1 = *path_2;
+	*path_2 = tmp;
+}
+void	sort_list(t_list_of_pathes *pathes)
+{
+	if (!pathes)
+		return;
+	t_list_of_pathes *tmp = pathes;
+	while (tmp)
+	{
+		t_list_of_pathes *start = pathes;
+		while (start->next)
+		{
+			if (path_len(start->path) > path_len(start->next->path))
+				swap_lists(&start->path, &start->next->path);
+			start = start->next;
+		}
+		tmp = tmp->next;
+	}
+}
+
 int		main(void)
 {
 	t_lem *lem = init();
@@ -881,29 +923,35 @@ int		main(void)
 	t_list_of_nodes *path;
 	while ((path = bfs(lem->end, lem->start, lem)))
 		push_path(&lem->pathes_1, path);
-	// show_all_pathes(lem->pathes_1, lem);
+
+	
+
 	
 	reset_used_nodes(lem->nodes, lem);
-	// sort_nodes_by_amount_of_links(lem->nodes);
+	sort_nodes_by_amount_of_links(lem->nodes, lem);
+
+
 
 	while ((path = bfs_less_links_oriented(lem->end, lem->start, lem)))
 		push_path(&lem->pathes_2, path);
-	// show_all_pathes(lem->pathes_2, lem);
+	sort_list(lem->pathes_2);
+
+
+
 
 	if (!lem->pathes_1 && !lem->pathes_2)
 		error("Not enough data to process", lem);
 	
-	t_list_of_pathes *pathes = lem->pathes_1;
-	// if (total_steps(lem->pathes_1, lem) <= total_steps(lem->pathes_2, lem))
-	// 	pathes = lem->pathes_1;
-	// else
-	// 	pathes = lem->pathes_2;
+	t_list_of_pathes *pathes;
+	if (total_steps(lem->pathes_1, lem) <= total_steps(lem->pathes_2, lem))
+		pathes = lem->pathes_1;
+	else
+		pathes = lem->pathes_2;
 
-	// show_all_pathes(pathes, lem);
-	// show_all_nodes(lem->nodes, lem);
-	
+	show_all_pathes(pathes, lem);
+
 	ants_contribution(pathes, lem);
 	
-	// system("leaks lem-in");
+	system("leaks lem-in");
 	return (0);
 }
