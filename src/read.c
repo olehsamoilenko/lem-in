@@ -12,28 +12,7 @@
 
 #include "lem-in.h"
 
-static void	read_number_of_ants(char *line, t_lem *lem)
-{
-	while(get_next_line_counter(GNL_READ_MODE, 0, &line, lem) && line[0] == '#')
-	{
-		if (ft_strequ(line, "##start"))
-			error("There is start command before number of ants", lem);
-			
-		if (ft_strequ(line, "##end"))
-			error("There is end command before number of ants", lem);
 
-		ft_strdel(&line);
-	}
-	if (!line)
-		error("Number of ants is missing", lem);
-	char *itoa = ft_itoa(ft_atoi(line));
-	if (ft_strequ(itoa, line) && ft_atoi(line) > 0)
-		lem->ants = ft_atoi(line);
-	else
-		error("Number of ants must be a positive integer", lem);
-	ft_strdel(&itoa);
-	ft_strdel(&line);
-}
 
 int		name_is_unique(t_node *node, t_list_of_nodes *nodes)
 {
@@ -103,34 +82,80 @@ int		line_is_link(char *line)
 		return (0);
 }
 
+int		command(char *line)
+{
+	if (ft_strequ(line, "##start") ||
+	ft_strequ(line, "##end") ||
+	ft_strequ(line, "##mark"))
+		return (1);
+	else
+	{
+		return (0);
+	}
+	
+}
 
+static void	ants_mode(char *line, int *mode, t_lem *lem)
+{
+	if (command(line))
+		error("Commands are forbidden befone number of ants", lem);
+	else
+	{
+		char *itoa = ft_itoa(ft_atoi(line));
+		if (ft_strequ(itoa, line) && ft_atoi(line) > 0)
+			lem->ants = ft_atoi(line);
+		else
+			error("Number of ants must be a positive integer", lem);
+		ft_strdel(&itoa);
+		*mode = MAP_ROOMS_MODE;
+	}
+}
+
+void	links_mode(char *line, t_lem *lem)
+{
+	if (command(line))
+		error("Commands are forbidden for links", lem);
+	else
+		create_link(line, lem);
+}
+
+void	rooms_mode(char *line, int *mode, t_lem *lem)
+{
+	if (ft_strequ(line, "##start"))
+		handle_start_room(lem);
+	else if (ft_strequ(line, "##end"))
+		handle_end_room(lem);
+	else if (ft_strequ(line, "##mark"))
+		handle_mark(lem);
+	else if (line_is_link(line))
+	{
+		*mode = MAP_LINKS_MODE;
+		links_mode(line, lem);
+	}
+	else
+	{
+		t_node *node = create_node(line, lem);
+		push_unique_room(node, lem);
+	}
+}
 
 void	read_map(t_lem *lem)
 {
 	char *line;
-	int mode = MAP_ROOMS_MODE;
-	
-	read_number_of_ants(line, lem);
+	int mode = MAP_ANTS_MODE;
+
 	while (get_next_line_counter(GNL_READ_MODE, 0, &line, lem))
 	{
-		if (ft_strequ(line, "##start"))
-			handle_start_room(lem);
-		else if (ft_strequ(line, "##end"))
-			handle_end_room(lem);
-		else if (ft_strequ(line, "##mark"))
-			handle_mark(lem);
-		else if (line[0] == '#')
+		if (ft_strequ(line, ""))
+			error("Empty lines are forbidden", lem);
+		else if (!command(line) && line[0] == '#')
 			;
-		else if (mode == MAP_LINKS_MODE || line_is_link(line))
-		{
-			create_link(line, lem);
-			mode = MAP_LINKS_MODE;
-		}
+		else if (mode == MAP_ANTS_MODE)
+			ants_mode(line, &mode, lem);
 		else if (mode == MAP_ROOMS_MODE)
-		{
-			t_node *node = create_node(line, lem);
-			push_unique_room(node, lem);
-		}
+			rooms_mode(line, &mode, lem);
+		else if (mode == MAP_LINKS_MODE)
+			links_mode(line, lem);
 		ft_strdel(&line);
 	}
 }

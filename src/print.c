@@ -22,37 +22,44 @@ void	step(t_list_of_ants *ants, t_lem *lem)
 	}
 }
 
+int		is_directly(t_list_of_nodes *path, t_lem *lem)
+{
+	if (path->node == lem->start && path->next->node == lem->end)
+		return (1);
+	else
+		return (0);
+}
+
 void	new_ants(t_list_of_ants **ants, t_list_of_pathes *pathes, int *ant_counter, t_lem *lem)
 {
+
 	t_list_of_pathes *start = pathes;
 	while (pathes && lem->ants - *ant_counter != 0)
 	{
-		t_list_of_pathes *tmp = start;
-		int shorter_ways_sum = 0;
-		while (tmp != pathes)
+		if (is_directly(start->path, lem))
 		{
-			shorter_ways_sum += path_len(pathes->path) - path_len(tmp->path);
-			tmp = tmp->next;
-		}
-
-		// printf("ants: %d\n", lem->ants - *ant_counter);
-		if (lem->ants - *ant_counter > shorter_ways_sum)
-		{
-			
 			(*ant_counter)++;
-
-			// printf("\t%d choose ", *ant_counter); show_path(pathes->path);
-
 			push_ant(ants, *ant_counter, pathes->path, lem);
-
+		}
+		else
+		{
+			t_list_of_pathes *tmp = start;
+			int shorter_ways_sum = 0;
+			while (tmp != pathes)
+			{
+				shorter_ways_sum += path_len(pathes->path) - path_len(tmp->path);
+				tmp = tmp->next;
+			}
+			if (lem->ants - *ant_counter > shorter_ways_sum)
+			{
+				(*ant_counter)++;
+				push_ant(ants, *ant_counter, pathes->path, lem);
+			}
+			pathes = pathes->next;
 
 		}
-		pathes = pathes->next;
-		
 	}
 	pathes = start;
-	
-
 }
 
 
@@ -183,6 +190,15 @@ void	print_total_steps(int total, t_lem *lem)
 		ft_putstr(DEFAULT);
 }
 
+void	directly(t_lem *lem)
+{
+	int i = 0;
+	while (++i <= lem->ants)
+	{
+
+	}
+}
+
 
 void	print_steps(t_list_of_pathes *pathes, t_lem *lem)
 {
@@ -191,16 +207,24 @@ void	print_steps(t_list_of_pathes *pathes, t_lem *lem)
 	int ant_counter = 0;
 	int total = 0;
 
-	new_ants(&ants, pathes, &ant_counter, lem);
-	while (ants)
-	{
-		step(ants, lem);
-		show_steps(ants, lem);
-		remove_finishers(&ants, lem);
+	// if (pathes->path->node == lem->start && pathes->path->next->node == lem->end)
+	// {
+	// 	directly();
+	// }
+	// else
+	// {
 		new_ants(&ants, pathes, &ant_counter, lem);
-		total++;
-	}
-	delete_list_of_ants(ants); // need ?
+		while (ants)
+		{
+			step(ants, lem);
+			show_steps(ants, lem);
+			remove_finishers(&ants, lem);
+			new_ants(&ants, pathes, &ant_counter, lem);
+			total++;
+		}
+		delete_list_of_ants(ants); // need ?
+	// }
+	
 	if (lem->flag_pathes)
 		show_pathes(pathes, lem);
 	if (lem->flag_steps)

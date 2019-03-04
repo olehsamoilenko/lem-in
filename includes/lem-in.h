@@ -18,6 +18,7 @@
 
 #define MAP_ROOMS_MODE 0
 #define MAP_LINKS_MODE 1
+#define MAP_ANTS_MODE 2
 #define GNL_READ_MODE 0
 #define GNL_RETURN_COUNT_MODE 1
 
