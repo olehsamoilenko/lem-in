@@ -14,7 +14,7 @@
 
 static void	read_number_of_ants(char *line, t_lem *lem)
 {
-	while(get_next_line_counter(GNL_READ_MODE, 0, &line) && line[0] == '#')
+	while(get_next_line_counter(GNL_READ_MODE, 0, &line, lem) && line[0] == '#')
 	{
 		if (ft_strequ(line, "##start"))
 			error("There is start command before number of ants", lem);
@@ -59,7 +59,7 @@ void	handle_start_room(t_lem *lem)
 	char *line;
 
 	// ft_strdel(&line);
-	get_next_line_counter(GNL_READ_MODE, 0, &line);
+	get_next_line_counter(GNL_READ_MODE, 0, &line, lem);
 	t_node *node = create_node(line, lem);
 	ft_strdel(&line);
 	
@@ -75,7 +75,7 @@ void	handle_end_room(t_lem *lem)
 {
 	char *line;
 
-	get_next_line_counter(GNL_READ_MODE, 0, &line);
+	get_next_line_counter(GNL_READ_MODE, 0, &line, lem);
 	t_node *node = create_node(line, lem);
 	ft_strdel(&line);
 	push_unique_room(node, lem);
@@ -84,14 +84,26 @@ void	handle_end_room(t_lem *lem)
 	lem->end = node;
 }
 
+void	handle_mark(t_lem *lem)
+{
+	char *line;
+
+	get_next_line_counter(GNL_READ_MODE, 0, &line, lem);
+	t_node *node = create_node(line, lem);
+	ft_strdel(&line);
+	push_unique_room(node, lem);
+	node->marked = 1;
+}
+
 int		line_is_link(char *line)
 {
 	if(ft_strchr(line, '-') && ft_char_count(' ', line) == 0)
 		return (1);
 	else
 		return (0);
-
 }
+
+
 
 void	read_map(t_lem *lem)
 {
@@ -99,12 +111,14 @@ void	read_map(t_lem *lem)
 	int mode = MAP_ROOMS_MODE;
 	
 	read_number_of_ants(line, lem);
-	while (get_next_line_counter(GNL_READ_MODE, 0, &line))
+	while (get_next_line_counter(GNL_READ_MODE, 0, &line, lem))
 	{
 		if (ft_strequ(line, "##start"))
 			handle_start_room(lem);
 		else if (ft_strequ(line, "##end"))
 			handle_end_room(lem);
+		else if (ft_strequ(line, "##mark"))
+			handle_mark(lem);
 		else if (line[0] == '#')
 			;
 		else if (mode == MAP_LINKS_MODE || line_is_link(line))

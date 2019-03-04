@@ -12,15 +12,19 @@
 
 #include "lem-in.h"
 
-int		get_next_line_counter(int mode, int fd, char **line)
+int		get_next_line_counter(int mode, int fd, char **line, t_lem *lem)
 {
 	static int count = 0;
 	if (mode == GNL_READ_MODE)
 	{
 		count++;
 		int res = get_next_line(fd, line);
+		if (lem->flag_color)
+			ft_putstr(RED);
 		if (res)
-			printf("%s\n", *line);
+			ft_putendl(*line);
+		if (lem->flag_color)
+			ft_putstr(DEFAULT);
 		return (res);
 	}
 	else if (mode == GNL_RETURN_COUNT_MODE)
@@ -49,15 +53,19 @@ void	error(char *message, t_lem *lem)
 {
 	char *line;
 
+	char *color;
+	if (lem->flag_color)
+		color = RED;
+	else
+		color = DEFAULT;
 	while (get_next_line(0, &line))
 	{
-		printf("%s\n", line);
+		printf("%s%s%s\n", color, line, DEFAULT);
 		ft_strdel(&line);
-
 	}
-	printf("\n");
-	printf("ERROR line %d: %s\n",
-		get_next_line_counter(GNL_RETURN_COUNT_MODE, 0, NULL), message);
+	printf("\n%sERROR line %d: %s%s\n", color,
+		get_next_line_counter(GNL_RETURN_COUNT_MODE, 0, NULL, lem),
+		message, DEFAULT);
 	system("leaks lem-in");
 	exit(0);
 }

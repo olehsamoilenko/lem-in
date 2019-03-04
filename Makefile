@@ -25,7 +25,8 @@ LIST =			main \
 				path \
 				ant \
 				list \
-				bfs
+				bfs \
+				flags
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 all: $(NAME)

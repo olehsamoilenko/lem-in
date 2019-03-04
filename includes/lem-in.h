@@ -21,13 +21,15 @@
 #define GNL_READ_MODE 0
 #define GNL_RETURN_COUNT_MODE 1
 
-#define DEFAULT "\033[0m"
-#define RED "\033[0;31m"
-#define GREEN "\033[0;32m"
-// #define BLUE "\033[0;34m"
-#define YELLOW "\033[0;33m"
-#define PURPLE "\033[0;35m"
-#define CYAN "\033[0;36m"
+#define DEFAULT		"\033[0m"
+#define RED			"\033[1;31m"
+#define GREEN		"\033[1;32m"
+#define YELLOW		"\033[1;33m"
+#define BLUE		"\033[1;34m"
+#define PURPLE		"\033[1;35m"
+#define CYAN		"\033[1;36m"
+#define BG_RED		"\033[41m"
+#define BG_DEFAULT	"\033[40m"
 
 typedef struct	s_node
 {
@@ -38,6 +40,7 @@ typedef struct	s_node
 	struct s_node			*bfs_prev;
 	int						bfs_used;
 	int						bfs_in_queue;
+	int						marked;
 }				t_node;
 
 /*
@@ -81,6 +84,8 @@ typedef struct	s_lem
 	t_list_of_pathes		*pathes_1;
 	t_list_of_pathes		*pathes_2;
 	int						flag_color;
+	int						flag_pathes;
+	int						flag_steps;
 }				t_lem;
 
 /*
@@ -105,13 +110,12 @@ void	read_map(t_lem *lem);
 
 
 // utils.c
-int		get_next_line_counter(int mode, int fd, char **line);
+int		get_next_line_counter(int mode, int fd, char **line, t_lem *lem);
 void	error(char *message, t_lem *lem);
 int		total_steps(t_list_of_pathes *list, t_lem *lem);
 
 // DELETE
 void	show_all_nodes(t_list_of_nodes *list, t_lem *lem);
-void	show_all_pathes(t_list_of_pathes *list, t_lem *lem);
 
 // node
 t_node			*create_node(char *line, t_lem *lem);
@@ -129,6 +133,7 @@ void	delete_path(t_list_of_nodes *path);
 
 // print
 void	print_steps(t_list_of_pathes *pathes, t_lem *lem);
+// void	show_pathes(t_list_of_pathes *list);
 
 // ant
 void	push_ant(t_list_of_ants **ants, int num, t_list_of_nodes *ant_position, t_lem *lem);
@@ -142,5 +147,8 @@ int		list_len(t_list_of_pathes *list);
 t_list_of_nodes *bfs(t_node *start, t_node *end, t_lem *lem);
 t_list_of_nodes *bfs_less_links_oriented(t_node *start, t_node *end, t_lem *lem);
 void reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem);
+
+// flags
+void	flags_handle(int argc, char **argv, t_lem *lem);
 
 #endif

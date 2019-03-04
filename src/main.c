@@ -197,31 +197,6 @@ void	sort_list(t_list_of_pathes *pathes)
 	}
 }
 
-void	print_usage()
-{
-	printf("Usage: ./lem-in [-c] < map\n");
-	exit(0);
-}
-
-void	flags_handle(int argc, char **argv, t_lem *lem)
-{
-	int i = 0;
-	while (++i < argc)
-	{
-		if (ft_strequ(argv[i], "-c"))
-		{
-			lem->flag_color = 1;
-		}
-		else
-		{
-			print_usage();
-		}
-			
-	}
-}
-
-
-
 int		main(int argc, char **argv)
 {
 	t_lem *lem = init();
@@ -242,21 +217,15 @@ int		main(int argc, char **argv)
 	t_list_of_nodes *path;
 	while ((path = bfs(lem->end, lem->start, lem)))
 		push_path(&lem->pathes_1, path);
-	// show_all_pathes(lem->pathes_1, lem);
-	
-	// show_all_nodes(lem->nodes, lem);
-	
+
 	reset_used_nodes(lem->nodes, lem);
 	sort_nodes_by_amount_of_links(lem->nodes, lem);
 
-	// show_all_nodes(lem->nodes, lem);
+
 
 	while ((path = bfs_less_links_oriented(lem->end, lem->start, lem)))
 		push_path(&lem->pathes_2, path);
 	sort_list(lem->pathes_2);
-	show_all_pathes(lem->pathes_2, lem);
-
-
 
 
 	if (!lem->pathes_1 && !lem->pathes_2)
@@ -268,9 +237,11 @@ int		main(int argc, char **argv)
 	else
 		pathes = lem->pathes_2;
 
-	show_all_pathes(pathes, lem);
+	// show_all_pathes(pathes, lem);
 
 	print_steps(pathes, lem);
+
+	// sleep(1);
 
 	
 	system("leaks lem-in");

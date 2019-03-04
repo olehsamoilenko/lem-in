@@ -71,6 +71,7 @@ t_node	*create_node(char *line, t_lem *lem)
 	node->name = ft_strdup(params[0]);
 	node->bfs_used = 0;
 	node->bfs_in_queue = 0;
+	node->marked = 0;
 	node->bfs_prev = NULL;
 	itoa1 = ft_itoa(ft_atoi(params[1]));
 	itoa2 = ft_itoa(ft_atoi(params[2]));

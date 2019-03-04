@@ -94,29 +94,93 @@ void	remove_finishers(t_list_of_ants **ants, t_lem *lem)
 	}
 }
 
-void	show_steps(t_list_of_ants *ants)
+void	show_steps(t_list_of_ants *ants, t_lem *lem)
 {
 	while (ants)
 	{
-		char *color = DEFAULT;
-		if (ants->ant_id % 5 == 0)
-			printf(RED);
-		else if (ants->ant_id % 5 == 1)
-			printf(GREEN);
-		else if (ants->ant_id % 5 == 2)
-			printf(CYAN);
-		else if (ants->ant_id % 5 == 3)
-			printf(YELLOW);
-		else if (ants->ant_id % 5 == 4)
-			printf(PURPLE);
-
-		printf("L%d-%s ", ants->ant_id,
+		// char *color = DEFAULT;
+		if (lem->flag_color)
+		{
+			if (ants->ant_id % 6 == 0)
+				ft_putstr(RED);
+			else if (ants->ant_id % 6 == 1)
+				ft_putstr(GREEN);
+			else if (ants->ant_id % 6 == 2)
+				ft_putstr(YELLOW);
+			else if (ants->ant_id % 6 == 3)
+				ft_putstr(BLUE);
+			else if (ants->ant_id % 6 == 4)
+				ft_putstr(PURPLE);
+			else if (ants->ant_id % 6 == 5)
+				ft_putstr(CYAN);
+			if (ants->position->node->marked)
+				ft_putstr(BG_RED);
+		}
+		ft_printf("L%d-%s", ants->ant_id,
 			ants->position->node->name);
-
-			printf("%s", DEFAULT);
+		if (lem->flag_color)
+			ft_putstr(DEFAULT);
+		ft_putchar(' ');
 		ants = ants->next;
 	}
-	printf("\n");
+	ft_putchar('\n');
+}
+
+void	print_path(t_list_of_nodes *path)
+{
+	while (1)
+	{
+		if (path->node->marked)
+			ft_putstr(BG_RED);
+		ft_putstr(path->node->name);
+		if (path->node->marked)
+			ft_putstr(BG_DEFAULT);
+		if (path->next == NULL)
+			break;
+		else
+		{
+			ft_putstr("->");
+		}
+		path = path->next;
+	}
+	ft_putchar('\n');
+}
+
+void	show_pathes(t_list_of_pathes *list, t_lem *lem)
+{
+	int count = 0;
+
+	if (lem->flag_color)
+		ft_putstr(RED);
+	printf("\nUnique pathes:\n");
+	
+	t_list_of_pathes *start = list;
+	while (list)
+	{
+		if (lem->flag_color)
+		{
+			if (++count % 2 == 0)
+				ft_putstr(BLUE);
+			else
+				ft_putstr(YELLOW);
+		}
+		print_path(list->path);
+
+		// ft_strdel(&path);
+		list = list->next;
+	}
+	ft_putstr(DEFAULT);
+	list = start;
+	
+}
+
+void	print_total_steps(int total, t_lem *lem)
+{
+	if (lem->flag_color)
+		ft_putstr(RED);
+		ft_printf("\nTolal steps: %d\n", total);
+	if (lem->flag_color)
+		ft_putstr(DEFAULT);
 }
 
 
@@ -125,16 +189,21 @@ void	print_steps(t_list_of_pathes *pathes, t_lem *lem)
 	t_list_of_ants *ants = NULL;
 
 	int ant_counter = 0;
+	int total = 0;
 
 	new_ants(&ants, pathes, &ant_counter, lem);
 	while (ants)
 	{
 		step(ants, lem);
-
-		show_steps(ants);
-
+		show_steps(ants, lem);
 		remove_finishers(&ants, lem);
 		new_ants(&ants, pathes, &ant_counter, lem);
+		total++;
 	}
 	delete_list_of_ants(ants); // need ?
+	if (lem->flag_pathes)
+		show_pathes(pathes, lem);
+	if (lem->flag_steps)
+		print_total_steps(total, lem);
+	
 }
