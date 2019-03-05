@@ -136,7 +136,7 @@ void	print_steps(t_list_of_pathes *pathes, t_lem *lem);
 
 // ant
 void	push_ant(t_list_of_ants **ants, int num, t_list_of_nodes *ant_position, t_lem *lem);
-void	delete_list_of_ants(t_list_of_ants *ants);
+// void	delete_list_of_ants(t_list_of_ants *ants);
 
 // bfs
 t_list_of_nodes *bfs(t_lem *lem);
@@ -144,7 +144,7 @@ t_list_of_nodes *bfs_less_links_oriented(t_lem *lem);
 void reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem);
 
 // flags
-void	flags_handle(int argc, char **argv, t_lem *lem);
+// void	flags_handle(int argc, char **argv, t_lem *lem);
 
 // get_pathes
 void	get_pathes(t_list_of_pathes **pathes_1, t_list_of_pathes **pathes_2, t_lem *lem);

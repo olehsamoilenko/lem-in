@@ -31,7 +31,6 @@ void	sort_links(t_list_of_nodes *nodes, t_lem *lem)
 		{
 			if (path_len(start->node->links) > path_len(start->next->node->links))
 				swap_nodes(&start->node, &start->next->node);
-			// if (start->next->node ==)
 			start = start->next;
 		}
 		tmp = tmp->next;

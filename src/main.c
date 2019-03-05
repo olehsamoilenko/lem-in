@@ -12,6 +12,28 @@
 
 #include "lem-in.h"
 
+void	flags_handle(int argc, char **argv, t_lem *lem)
+{
+	int i = 0;
+	while (++i < argc)
+	{
+		if (ft_strequ(argv[i], "-c"))
+			lem->flag_color = 1;
+		else if (ft_strequ(argv[i], "-p"))
+			lem->flag_pathes = 1;
+		else if (ft_strequ(argv[i], "-s"))
+			lem->flag_steps = 1;
+		else
+		{
+			ft_putendl("Usage: ./lem-in [-c][-p][-s] < map");
+			ft_putendl("\t-c\tcolors");
+			ft_putendl("\t-p\tlist of unique pathes");
+			ft_putendl("\t-s\ttotal number of steps");
+			exit(0);
+		}
+	}
+}
+
 t_lem	*init()
 {
 	t_lem *lem = ft_memalloc(sizeof(t_lem));

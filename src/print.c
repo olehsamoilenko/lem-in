@@ -22,13 +22,13 @@ void	step(t_list_of_ants *ants, t_lem *lem)
 	}
 }
 
-int		is_directly(t_list_of_nodes *path, t_lem *lem)
-{
-	if (path->node == lem->start && path->next->node == lem->end)
-		return (1);
-	else
-		return (0);
-}
+// int		is_directly(t_list_of_nodes *path, t_lem *lem)
+// {
+// 	if ()
+// 		return (1);
+// 	else
+// 		return (0);
+// }
 
 void	new_ants(t_list_of_ants **ants, t_list_of_pathes *pathes, int *ant_counter, t_lem *lem)
 {
@@ -36,7 +36,7 @@ void	new_ants(t_list_of_ants **ants, t_list_of_pathes *pathes, int *ant_counter,
 	t_list_of_pathes *start = pathes;
 	while (pathes && lem->ants - *ant_counter != 0)
 	{
-		if (is_directly(start->path, lem))
+		if (start->path->node == lem->start && start->path->next->node == lem->end)
 		{
 			(*ant_counter)++;
 			push_ant(ants, *ant_counter, pathes->path, lem);
@@ -159,7 +159,7 @@ void	show_pathes(t_list_of_pathes *list, t_lem *lem)
 
 	if (lem->flag_color)
 		ft_putstr(RED);
-	printf("\nUnique pathes:\n");
+	ft_putstr("\nUnique pathes:\n");
 	
 	t_list_of_pathes *start = list;
 	while (list)
@@ -209,8 +209,6 @@ void	print_steps(t_list_of_pathes *pathes, t_lem *lem)
 		new_ants(&ants, pathes, &ant_counter, lem);
 		total++;
 	}
-	delete_list_of_ants(ants); // need ?
-	
 	
 	if (lem->flag_pathes)
 		show_pathes(pathes, lem);

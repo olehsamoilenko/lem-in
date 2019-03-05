@@ -24,7 +24,6 @@ LIST =			main \
 				path \
 				ant \
 				bfs \
-				flags \
 				get_pathes \
 				sort \
 				total_steps

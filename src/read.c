@@ -12,22 +12,17 @@
 
 #include "lem-in.h"
 
-
-
-int		name_is_unique(t_node *node, t_list_of_nodes *nodes)
-{
-	while (nodes)
-	{
-		if (ft_strequ(nodes->node->name, node->name))
-			return (0);
-		nodes = nodes->next;
-	}
-	return (1);
-}
-
 void	push_unique_room(t_node *node, t_lem *lem)
 {
-	if (name_is_unique(node, lem->nodes))
+	int unique = 1;
+	t_list_of_nodes *tmp = lem->nodes;
+	while (tmp)
+	{
+		if (ft_strequ(tmp->node->name, node->name))
+			unique = 0;
+		tmp = tmp->next;
+	}
+	if (unique)
 		push_node(&lem->nodes, node, lem);
 	else
 		error("Room's name must be unique", lem);
@@ -37,7 +32,6 @@ void	handle_start_room(t_lem *lem)
 {
 	char *line;
 
-	// ft_strdel(&line);
 	get_next_line_counter(GNL_READ_MODE, 0, &line, lem);
 	t_node *node = create_node(line, lem);
 	ft_strdel(&line);
@@ -72,14 +66,6 @@ void	handle_mark(t_lem *lem)
 	ft_strdel(&line);
 	push_unique_room(node, lem);
 	node->marked = 1;
-}
-
-int		line_is_link(char *line)
-{
-	if(ft_strchr(line, '-') && ft_char_count(' ', line) == 0)
-		return (1);
-	else
-		return (0);
 }
 
 int		command(char *line)
@@ -127,7 +113,7 @@ void	rooms_mode(char *line, int *mode, t_lem *lem)
 		handle_end_room(lem);
 	else if (ft_strequ(line, "##mark"))
 		handle_mark(lem);
-	else if (line_is_link(line))
+	else if (ft_strchr(line, '-') && ft_char_count(' ', line) == 0)
 	{
 		*mode = MAP_LINKS_MODE;
 		links_mode(line, lem);

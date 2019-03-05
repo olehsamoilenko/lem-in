@@ -12,23 +12,23 @@
 
 #include "lem-in.h"
 
-void	delete_list_of_ants(t_list_of_ants *ants)
-{
-	t_list_of_ants *start = ants; // ?
-	if (ants == NULL)
-		return;
-	while ((ants)->next != NULL)
-	{
-		while ((ants)->next->next != NULL)
-			ants = (ants)->next;
-		free((ants)->next);
-		(ants)->next = NULL;
-		ants = start;
-	}
-	free(ants);
-	// path = NULL;
+// void	delete_list_of_ants(t_list_of_ants *ants)
+// {
+// 	t_list_of_ants *start = ants; // ?
+// 	if (ants == NULL)
+// 		return;
+// 	while ((ants)->next != NULL)
+// 	{
+// 		while ((ants)->next->next != NULL)
+// 			ants = (ants)->next;
+// 		free((ants)->next);
+// 		(ants)->next = NULL;
+// 		ants = start;
+// 	}
+// 	free(ants);
+// 	// path = NULL;
 	
-}
+// }
 
 
 t_list_of_ants	*create_list_of_ants(int num, t_list_of_nodes *ant_position)
