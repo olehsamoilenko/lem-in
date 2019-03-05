@@ -14,7 +14,7 @@ NAME =			lem-in
 INC =			-I ./includes \
 				-I ./libft/includes
 LIB =			-lft -L ./libft
-FLAGS =			-Wall -Wextra -Werror
+FLAGS =			#-Wall -Wextra -Werror
 LIST =			ant \
 				ants_contribution \
 				bfs \
@@ -26,8 +26,7 @@ LIST =			ant \
 				print \
 				read_rooms \
 				read \
-				sort \
-
+				sort
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 all: $(NAME)

@@ -79,7 +79,7 @@ void			error(char *message, t_lem *lem)
 		color = RED;
 	else
 		color = DEFAULT;
-	while (get_next_line(0, &line))
+	while (get_next_line(0, &line) == 1)
 	{
 		ft_printf("%s%s%s\n", color, line, DEFAULT);
 		ft_strdel(&line);
@@ -87,7 +87,6 @@ void			error(char *message, t_lem *lem)
 	ft_printf("\n%sERROR line %d: %s%s\n", color,
 		get_next_line_counter(GNL_RETURN_COUNT_MODE, 0, NULL, lem),
 		message, DEFAULT);
-	system("leaks lem-in");
 	exit(0);
 }
 
@@ -111,6 +110,5 @@ int				main(int argc, char **argv)
 		ants_contribution(pathes_1, lem);
 	else
 		ants_contribution(pathes_2, lem);
-	system("leaks lem-in");
 	return (0);
 }

@@ -50,7 +50,7 @@ static void	ants_mode(char *line, int *mode, t_lem *lem)
 	char *itoa;
 
 	if (command(line))
-		error("Commands are forbidden befone number of ants", lem);
+		error("Commands are forbidden before number of ants", lem);
 	else
 	{
 		itoa = ft_itoa(ft_atoi(line));
