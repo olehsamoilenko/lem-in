@@ -46,12 +46,14 @@ void	sort_nodes_by_amount_of_links(t_list_of_nodes *nodes, t_lem *lem)
 	}
 }
 
-void	swap_lists(t_list_of_nodes **path_1, t_list_of_nodes **path_2)
+void	swap_pathes(t_list_of_nodes **path_1, t_list_of_nodes **path_2)
 {
 	t_list_of_nodes *tmp = *path_1;
 	*path_1 = *path_2;
 	*path_2 = tmp;
-}void	sort_pathes_by_len(t_list_of_pathes *pathes)
+}
+
+void	sort_pathes_by_len(t_list_of_pathes *pathes)
 {
 	if (!pathes)
 		return;
@@ -62,7 +64,7 @@ void	swap_lists(t_list_of_nodes **path_1, t_list_of_nodes **path_2)
 		while (start->next)
 		{
 			if (path_len(start->path) > path_len(start->next->path))
-				swap_lists(&start->path, &start->next->path);
+				swap_pathes(&start->path, &start->next->path);
 			start = start->next;
 		}
 		tmp = tmp->next;

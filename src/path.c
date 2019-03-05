@@ -38,7 +38,6 @@ t_list_of_pathes *create_list_of_pathes(t_list_of_nodes *first_path)
 	return (list);
 }
 
-
 void	push_path(t_list_of_pathes **list, t_list_of_nodes *path)
 {
 	if (*list == NULL)

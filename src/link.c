@@ -25,15 +25,12 @@ int		path_contains_node(t_list_of_nodes *path, t_node *node) //rename
 
 t_node	*find_node(char *name, t_list_of_nodes *nodes) // rename
 {
-	int i = -1;
-	// t_list_of_nodes *start = nodes;
 	while (nodes)
 	{
 		if (ft_strequ(name, nodes->node->name))
 			return (nodes->node);
 		nodes = nodes->next;
 	}
-	// nodes = start;
 	return (NULL);
 }
 
@@ -55,9 +52,5 @@ void	create_link(char *line, t_lem *lem)
 		push_node(&n2->links, n1, lem);
 	}
 	else
-	{
 		error("Link duplication is forbidden", lem);
-	}
-	
-		
 }

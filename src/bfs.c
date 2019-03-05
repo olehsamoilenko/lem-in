@@ -12,7 +12,7 @@
 
 #include "lem-in.h"
 
-t_list_of_nodes *form_path(t_node *node, t_lem *lem)
+t_list_of_nodes	*form_path(t_node *node, t_lem *lem)
 {
 	t_list_of_nodes *path = NULL;
 
@@ -25,7 +25,7 @@ t_list_of_nodes *form_path(t_node *node, t_lem *lem)
 	return (path);
 }
 
-void reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem)
+void			reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem)
 {
 	while (nodes)
 	{
@@ -69,7 +69,7 @@ t_list_of_nodes *bfs(t_lem *lem)
 	return (NULL);
 }
 
-t_list_of_nodes *bfs_less_links_oriented(t_lem *lem)
+t_list_of_nodes	*bfs_less_links_oriented(t_lem *lem)
 {
 	t_list_of_nodes *queue = create_list_of_nodes(lem->end);
 	reset_nodes_in_queue(lem->nodes, lem);
@@ -99,8 +99,6 @@ t_list_of_nodes *bfs_less_links_oriented(t_lem *lem)
 						if (tmp->node->links->node != node) ////// work ?????????????
 							node_pushed = 1;
 					}
-					// if (tmp->node == end)
-					// 	break;
 				}
 				tmp = tmp->next;
 			}

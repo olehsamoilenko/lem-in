@@ -12,60 +12,24 @@
 
 #include "lem-in.h"
 
-void	push_unique_room(t_node *node, t_lem *lem)
+int		get_next_line_counter(int mode, int fd, char **line, t_lem *lem)
 {
-	int unique = 1;
-	t_list_of_nodes *tmp = lem->nodes;
-	while (tmp)
+	static int count = 0;
+	if (mode == GNL_READ_MODE)
 	{
-		if (ft_strequ(tmp->node->name, node->name))
-			unique = 0;
-		tmp = tmp->next;
+		count++;
+		int res = get_next_line(fd, line);
+		if (lem->flag_color)
+			ft_putstr(RED);
+		if (res)
+			ft_putendl(*line);
+		if (lem->flag_color)
+			ft_putstr(DEFAULT);
+		return (res);
 	}
-	if (unique)
-		push_node(&lem->nodes, node, lem);
-	else
-		error("Room's name must be unique", lem);
-}
-
-void	handle_start_room(t_lem *lem)
-{
-	char *line;
-
-	get_next_line_counter(GNL_READ_MODE, 0, &line, lem);
-	t_node *node = create_node(line, lem);
-	ft_strdel(&line);
-	
-	push_unique_room(node, lem);
-
-
-	if (lem->start != NULL)
-		error("Too much start rooms", lem);
-	lem->start = node;
-}
-
-void	handle_end_room(t_lem *lem)
-{
-	char *line;
-
-	get_next_line_counter(GNL_READ_MODE, 0, &line, lem);
-	t_node *node = create_node(line, lem);
-	ft_strdel(&line);
-	push_unique_room(node, lem);
-	if (lem->end != NULL)
-		error("Too much end rooms", lem);
-	lem->end = node;
-}
-
-void	handle_mark(t_lem *lem)
-{
-	char *line;
-
-	get_next_line_counter(GNL_READ_MODE, 0, &line, lem);
-	t_node *node = create_node(line, lem);
-	ft_strdel(&line);
-	push_unique_room(node, lem);
-	node->marked = 1;
+	else if (mode == GNL_RETURN_COUNT_MODE)
+		return (count);
+	else return (0);
 }
 
 int		command(char *line)
@@ -75,10 +39,7 @@ int		command(char *line)
 	ft_strequ(line, "##mark"))
 		return (1);
 	else
-	{
 		return (0);
-	}
-	
 }
 
 static void	ants_mode(char *line, int *mode, t_lem *lem)
@@ -103,26 +64,6 @@ void	links_mode(char *line, t_lem *lem)
 		error("Commands are forbidden for links", lem);
 	else
 		create_link(line, lem);
-}
-
-void	rooms_mode(char *line, int *mode, t_lem *lem)
-{
-	if (ft_strequ(line, "##start"))
-		handle_start_room(lem);
-	else if (ft_strequ(line, "##end"))
-		handle_end_room(lem);
-	else if (ft_strequ(line, "##mark"))
-		handle_mark(lem);
-	else if (ft_strchr(line, '-') && ft_char_count(' ', line) == 0)
-	{
-		*mode = MAP_LINKS_MODE;
-		links_mode(line, lem);
-	}
-	else
-	{
-		t_node *node = create_node(line, lem);
-		push_unique_room(node, lem);
-	}
 }
 
 void	read_map(t_lem *lem)

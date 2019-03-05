@@ -12,6 +12,33 @@
 
 #include "lem-in.h"
 
+void	remove_node(t_list_of_nodes **list, t_node *node)
+{
+	t_list_of_nodes *tmp;
+	
+	if ((*list)->node == node)
+	{
+		tmp = *list;
+		*list = (*list)->next;
+	}
+	else
+	{
+		t_list_of_nodes *start = *list;
+		while ((*list)->next)
+		{
+			if ((*list)->next->node == node)
+			{
+				tmp = (*list)->next;
+				(*list)->next = (*list)->next->next;
+				break;
+			}
+			*list = (*list)->next;
+		}
+		*list = start;
+	}
+	free(tmp);
+}
+
 void	start_to_end_handle(t_lem *lem, t_list_of_pathes **pathes_1, t_list_of_pathes **pathes_2)
 {
 	if (path_contains_node(lem->start->links, lem->end))

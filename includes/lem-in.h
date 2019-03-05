@@ -106,13 +106,14 @@ typedef struct	s_list_of_ants
 
 // read.c
 void	read_map(t_lem *lem);
+void	links_mode(char *line, t_lem *lem);
+int		get_next_line_counter(int mode, int fd, char **line, t_lem *lem);
 
 // main.c
-
+void	error(char *message, t_lem *lem);
 
 // utils.c
-int		get_next_line_counter(int mode, int fd, char **line, t_lem *lem);
-void	error(char *message, t_lem *lem);
+
 
 // node
 t_node			*create_node(char *line, t_lem *lem);
@@ -130,9 +131,14 @@ int		path_len(t_list_of_nodes *list);
 void	delete_path(t_list_of_nodes *path);
 void	push_path(t_list_of_pathes **list, t_list_of_nodes *path);
 
-// print
-void	print_steps(t_list_of_pathes *pathes, t_lem *lem);
+// ants_contribution
+void	ants_contribution(t_list_of_pathes *pathes, t_lem *lem);
 // void	show_pathes(t_list_of_pathes *list);
+
+// print
+void	print_steps(t_list_of_ants *ants, t_lem *lem);
+void	print_pathes(t_list_of_pathes *list, t_lem *lem);
+void	print_total_steps(int total, t_lem *lem);
 
 // ant
 void	push_ant(t_list_of_ants **ants, int num, t_list_of_nodes *ant_position, t_lem *lem);
@@ -154,7 +160,10 @@ void	sort_pathes_by_len(t_list_of_pathes *pathes);
 void	sort_nodes_by_amount_of_links(t_list_of_nodes *nodes, t_lem *lem);
 
 // total_steps
-int		total_steps(t_list_of_pathes *list, t_lem *lem);
+// int		total_steps(t_list_of_pathes *list, t_lem *lem);
+
+// read_rooms
+void	rooms_mode(char *line, int *mode, t_lem *lem);
 
 
 #endif
