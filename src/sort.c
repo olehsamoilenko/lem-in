@@ -10,26 +10,32 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lem-in.h"
+#include "lemin.h"
 
-void	swap_nodes(t_node **link_1, t_node **link_2)
+static void	swap_nodes(t_node **link_1, t_node **link_2)
 {
-	t_node *tmp = *link_1;
+	t_node *tmp;
+
+	tmp = *link_1;
 	*link_1 = *link_2;
 	*link_2 = tmp;
 }
 
-void	sort_links(t_list_of_nodes *nodes, t_lem *lem)
+static void	sort_links(t_list_of_nodes *nodes)
 {
+	t_list_of_nodes *tmp;
+	t_list_of_nodes *start;
+
 	if (!nodes)
-		return;
-	t_list_of_nodes *tmp = nodes;
+		return ;
+	tmp = nodes;
 	while (tmp)
 	{
-		t_list_of_nodes *start = nodes;
+		start = nodes;
 		while (start->next)
 		{
-			if (path_len(start->node->links) > path_len(start->next->node->links))
+			if (path_len(start->node->links) >
+				path_len(start->next->node->links))
 				swap_nodes(&start->node, &start->next->node);
 			start = start->next;
 		}
@@ -37,30 +43,35 @@ void	sort_links(t_list_of_nodes *nodes, t_lem *lem)
 	}
 }
 
-void	sort_nodes_by_amount_of_links(t_list_of_nodes *nodes, t_lem *lem)
+void		sort_nodes_by_amount_of_links(t_list_of_nodes *nodes)
 {
 	while (nodes)
 	{
-		sort_links(nodes->node->links, lem);
+		sort_links(nodes->node->links);
 		nodes = nodes->next;
 	}
 }
 
-void	swap_pathes(t_list_of_nodes **path_1, t_list_of_nodes **path_2)
+static void	swap_pathes(t_list_of_nodes **path_1, t_list_of_nodes **path_2)
 {
-	t_list_of_nodes *tmp = *path_1;
+	t_list_of_nodes *tmp;
+
+	tmp = *path_1;
 	*path_1 = *path_2;
 	*path_2 = tmp;
 }
 
-void	sort_pathes_by_len(t_list_of_pathes *pathes)
+void		sort_pathes_by_len(t_list_of_pathes *pathes)
 {
+	t_list_of_pathes *start;
+	t_list_of_pathes *tmp;
+
 	if (!pathes)
-		return;
-	t_list_of_pathes *tmp = pathes;
+		return ;
+	tmp = pathes;
 	while (tmp)
 	{
-		t_list_of_pathes *start = pathes;
+		start = pathes;
 		while (start->next)
 		{
 			if (path_len(start->path) > path_len(start->next->path))

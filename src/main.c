@@ -10,11 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lem-in.h"
+#include "lemin.h"
 
-void	flags_handle(int argc, char **argv, t_lem *lem)
+static void		flags_handle(int argc, char **argv, t_lem *lem)
 {
-	int i = 0;
+	int i;
+
+	i = 0;
 	while (++i < argc)
 	{
 		if (ft_strequ(argv[i], "-c"))
@@ -34,9 +36,11 @@ void	flags_handle(int argc, char **argv, t_lem *lem)
 	}
 }
 
-t_lem	*init()
+static t_lem	*init(void)
 {
-	t_lem *lem = ft_memalloc(sizeof(t_lem));
+	t_lem *lem;
+
+	lem = ft_memalloc(sizeof(t_lem));
 	lem->nodes = NULL;
 	lem->start = NULL;
 	lem->end = NULL;
@@ -44,28 +48,29 @@ t_lem	*init()
 	return (lem);
 }
 
-int		total_steps(t_list_of_pathes *list, t_lem *lem)
+static int		total_steps(t_list_of_pathes *list, t_lem *lem)
 {
-	int l = 0;
-	int k = 0;
+	int l;
+	int k;
+	int res;
 
-	while (list) // seg
+	k = 0;
+	l = 0;
+	while (list)
 	{
 		l += path_len(list->path);
 		k++;
 		list = list->next;
 	}
-
 	if (k == 0)
 		return (__INT_MAX__);
-
-	int res = (lem->ants + l) / k - 1;
+	res = (lem->ants + l) / k - 1;
 	if ((lem->ants + l) % k != 0)
 		res += 1;
 	return (res);
 }
 
-void	error(char *message, t_lem *lem)
+void			error(char *message, t_lem *lem)
 {
 	char *line;
 	char *color;
@@ -76,38 +81,36 @@ void	error(char *message, t_lem *lem)
 		color = DEFAULT;
 	while (get_next_line(0, &line))
 	{
-		printf("%s%s%s\n", color, line, DEFAULT);
+		ft_printf("%s%s%s\n", color, line, DEFAULT);
 		ft_strdel(&line);
 	}
-	printf("\n%sERROR line %d: %s%s\n", color,
+	ft_printf("\n%sERROR line %d: %s%s\n", color,
 		get_next_line_counter(GNL_RETURN_COUNT_MODE, 0, NULL, lem),
 		message, DEFAULT);
 	system("leaks lem-in");
 	exit(0);
 }
 
-int		main(int argc, char **argv)
+int				main(int argc, char **argv)
 {
-	t_lem *lem = init();
+	t_list_of_pathes	*pathes_1;
+	t_list_of_pathes	*pathes_2;
+	t_lem				*lem;
+
+	lem = init();
 	flags_handle(argc, argv, lem);
 	read_map(lem);
-	printf("\n");
-
 	if (lem->start == NULL)
 		error("The start room is missing", lem);
 	if (lem->end == NULL)
 		error("The end room is missing", lem);
-
-	t_list_of_pathes *pathes_1 = NULL;
-	t_list_of_pathes *pathes_2 = NULL;
-
+	pathes_1 = NULL;
+	pathes_2 = NULL;
 	get_pathes(&pathes_1, &pathes_2, lem);
-
 	if (total_steps(pathes_1, lem) <= total_steps(pathes_2, lem))
 		ants_contribution(pathes_1, lem);
 	else
 		ants_contribution(pathes_2, lem);
-
 	system("leaks lem-in");
 	return (0);
 }

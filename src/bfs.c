@@ -10,12 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lem-in.h"
+#include "lemin.h"
 
-t_list_of_nodes	*form_path(t_node *node, t_lem *lem)
+static t_list_of_nodes	*form_path(t_node *node)
 {
-	t_list_of_nodes *path = NULL;
+	t_list_of_nodes *path;
 
+	path = NULL;
 	while (node)
 	{
 		push_node(&path, node);
@@ -25,7 +26,7 @@ t_list_of_nodes	*form_path(t_node *node, t_lem *lem)
 	return (path);
 }
 
-void			reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem)
+void					reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem)
 {
 	while (nodes)
 	{
@@ -35,10 +36,10 @@ void			reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem)
 	}
 	lem->start->bfs_used = 0;
 	lem->end->bfs_in_queue = 1;
-	
 }
 
-void			work_with_links(t_list_of_nodes *links, t_list_of_nodes **queue, t_node *prev)
+static void				work_with_links(t_list_of_nodes *links,
+						t_list_of_nodes **queue, t_node *prev)
 {
 	while (links)
 	{
@@ -52,9 +53,12 @@ void			work_with_links(t_list_of_nodes *links, t_list_of_nodes **queue, t_node *
 	}
 }
 
-void			work_with_links_2(t_list_of_nodes *links, t_list_of_nodes **queue, t_node *prev)
+static void				work_with_links_2(t_list_of_nodes *links,
+						t_list_of_nodes **queue, t_node *prev)
 {
-	int node_pushed = 0;
+	int node_pushed;
+
+	node_pushed = 0;
 	while (links)
 	{
 		if (links->node->bfs_in_queue == 0 && links->node->bfs_used == 0)
@@ -64,7 +68,7 @@ void			work_with_links_2(t_list_of_nodes *links, t_list_of_nodes **queue, t_node
 				push_node(queue, links->node);
 				links->node->bfs_in_queue = 1;
 				links->node->bfs_prev = prev;
-				if (links->node->links->node != prev) ////// work ?????????????
+				if (links->node->links->node != prev)
 					node_pushed = 1;
 			}
 		}
@@ -72,21 +76,20 @@ void			work_with_links_2(t_list_of_nodes *links, t_list_of_nodes **queue, t_node
 	}
 }
 
-t_list_of_nodes *bfs(t_lem *lem, int mode)
+t_list_of_nodes			*bfs(t_lem *lem, int mode)
 {
 	t_list_of_nodes *queue;
 	t_node			*node;
-	
-	queue = create_list_of_nodes(lem->end); // mb node_push ?
+
+	queue = create_list_of_nodes(lem->end);
 	reset_nodes_in_queue(lem->nodes, lem);
-	
-	while(queue)
+	while (queue)
 	{
 		node = pop_node(&queue);
 		if (node == lem->start)
 		{
 			delete_path(queue);
-			return (form_path(lem->start, lem));
+			return (form_path(lem->start));
 		}
 		else
 		{
@@ -95,7 +98,6 @@ t_list_of_nodes *bfs(t_lem *lem, int mode)
 			else if (mode == 1)
 				work_with_links_2(node->links, &queue, node);
 		}
-			
 	}
 	return (NULL);
 }

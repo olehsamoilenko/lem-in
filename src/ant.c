@@ -10,56 +10,63 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lem-in.h"
+#include "lemin.h"
 
-// void	delete_list_of_ants(t_list_of_ants *ants)
-// {
-// 	t_list_of_ants *start = ants; // ?
-// 	if (ants == NULL)
-// 		return;
-// 	while ((ants)->next != NULL)
-// 	{
-// 		while ((ants)->next->next != NULL)
-// 			ants = (ants)->next;
-// 		free((ants)->next);
-// 		(ants)->next = NULL;
-// 		ants = start;
-// 	}
-// 	free(ants);
-// 	// path = NULL;
-	
-// }
-
-
-t_list_of_ants	*create_list_of_ants(int num, t_list_of_nodes *ant_position)
+static t_list_of_ants	*create_list_of_ants(int num,
+						t_list_of_nodes *ant_position)
 {
-	t_list_of_ants *ants = ft_memalloc(sizeof(t_list_of_ants));
+	t_list_of_ants *ants;
+
+	ants = ft_memalloc(sizeof(t_list_of_ants));
 	ants->ant_id = num;
 	ants->position = ant_position;
 	ants->next = NULL;
 	return (ants);
 }
 
-void	push_ant(t_list_of_ants **ants, int num, t_list_of_nodes *ant_position, t_lem *lem)
+void					remove_ant(t_list_of_ants **ants, t_list_of_ants *ant)
 {
+	t_list_of_ants *tmp;
+	t_list_of_ants *start;
+
+	tmp = NULL;
+	if (*ants == ant)
+	{
+		tmp = *ants;
+		*ants = (*ants)->next;
+	}
+	else
+	{
+		start = *ants;
+		while (start->next)
+		{
+			if (start->next == ant)
+			{
+				tmp = start->next;
+				start->next = start->next->next;
+				break ;
+			}
+			start = start->next;
+		}
+	}
+	free(tmp);
+}
+
+void					push_ant(t_list_of_ants **ants, int num,
+						t_list_of_nodes *ant_position)
+{
+	t_list_of_ants *start;
+
 	if (*ants == NULL)
 		*ants = create_list_of_ants(num, ant_position);
 	else
 	{
-		t_list_of_ants *start = *ants;
-
-		while ((*ants)->next != NULL)
-		{
-			
-			// check_parameters_equalness((*list)->node, node, lem);
-			*ants = (*ants)->next;
-		}
-		// check_parameters_equalness((*list)->node, node, lem);
-	
-		(*ants)->next = ft_memalloc(sizeof(t_list_of_ants));
-		(*ants)->next->ant_id = num;
-		(*ants)->next->position = ant_position;
-		(*ants)->next->next = NULL;
-		*ants = start; // fix
+		start = *ants;
+		while (start->next != NULL)
+			start = start->next;
+		start->next = ft_memalloc(sizeof(t_list_of_ants));
+		start->next->ant_id = num;
+		start->next->position = ant_position;
+		start->next->next = NULL;
 	}
 }

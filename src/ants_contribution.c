@@ -10,11 +10,13 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lem-in.h"
+#include "lemin.h"
 
-void	step(t_list_of_ants *ants, t_lem *lem)
+static void	step(t_list_of_ants *ants)
 {
-	t_list_of_ants *buf = ants;
+	t_list_of_ants *buf;
+
+	buf = ants;
 	while (buf)
 	{
 		buf->position = buf->position->next;
@@ -22,29 +24,39 @@ void	step(t_list_of_ants *ants, t_lem *lem)
 	}
 }
 
-void	new_ants(t_list_of_ants **ants, t_list_of_pathes *pathes, int *ant_counter, t_lem *lem)
+static int	count_ways_sum(t_list_of_pathes *start, t_list_of_pathes *curr)
 {
-	t_list_of_pathes *start = pathes;
+	int ways_sum;
+
+	ways_sum = 0;
+	while (start != curr)
+	{
+		ways_sum += path_len(curr->path) - path_len(start->path);
+		start = start->next;
+	}
+	return (ways_sum);
+}
+
+static void	new_ants(t_list_of_ants **ants, t_list_of_pathes *pathes,
+		int *ant_counter, t_lem *lem)
+{
+	t_list_of_pathes	*start;
+
+	start = pathes;
 	while (pathes && lem->ants - *ant_counter != 0)
 	{
-		if (start->path->node == lem->start && start->path->next->node == lem->end)
+		if (start->path->node == lem->start &&
+			start->path->next->node == lem->end)
 		{
 			(*ant_counter)++;
-			push_ant(ants, *ant_counter, pathes->path, lem);
+			push_ant(ants, *ant_counter, pathes->path);
 		}
 		else
 		{
-			t_list_of_pathes *tmp = start;
-			int shorter_ways_sum = 0;
-			while (tmp != pathes)
-			{
-				shorter_ways_sum += path_len(pathes->path) - path_len(tmp->path);
-				tmp = tmp->next;
-			}
-			if (lem->ants - *ant_counter > shorter_ways_sum)
+			if (lem->ants - *ant_counter > count_ways_sum(start, pathes))
 			{
 				(*ant_counter)++;
-				push_ant(ants, *ant_counter, pathes->path, lem);
+				push_ant(ants, *ant_counter, pathes->path);
 			}
 			pathes = pathes->next;
 		}
@@ -52,37 +64,11 @@ void	new_ants(t_list_of_ants **ants, t_list_of_pathes *pathes, int *ant_counter,
 	pathes = start;
 }
 
-
-void	remove_ant(t_list_of_ants **ants, t_list_of_ants *ant)
+static void	remove_finishers(t_list_of_ants **ants, t_lem *lem)
 {
 	t_list_of_ants *tmp;
-	
-	if (*ants == ant)
-	{
-		tmp = *ants;
-		*ants = (*ants)->next;
-	}
-	else
-	{
-		t_list_of_ants *start = *ants;
-		while ((*ants)->next)
-		{
-			if ((*ants)->next == ant)
-			{
-				tmp = (*ants)->next;
-				(*ants)->next = (*ants)->next->next;
-				break;
-			}
-			*ants = (*ants)->next;
-		}
-		*ants = start;
-	}
-	free(tmp);
-}
 
-void	remove_finishers(t_list_of_ants **ants, t_lem *lem)
-{
-	t_list_of_ants *tmp = *ants;
+	tmp = *ants;
 	while (tmp)
 	{
 		if (tmp->position->node == lem->end)
@@ -91,11 +77,11 @@ void	remove_finishers(t_list_of_ants **ants, t_lem *lem)
 	}
 }
 
-void	ants_contribution(t_list_of_pathes *pathes, t_lem *lem)
+void		ants_contribution(t_list_of_pathes *pathes, t_lem *lem)
 {
-	t_list_of_ants *ants;
-	int ant_counter;
-	int total;
+	t_list_of_ants	*ants;
+	int				ant_counter;
+	int				total;
 
 	ants = NULL;
 	ant_counter = 0;
@@ -103,7 +89,7 @@ void	ants_contribution(t_list_of_pathes *pathes, t_lem *lem)
 	new_ants(&ants, pathes, &ant_counter, lem);
 	while (ants)
 	{
-		step(ants, lem);
+		step(ants);
 		print_steps(ants, lem);
 		remove_finishers(&ants, lem);
 		new_ants(&ants, pathes, &ant_counter, lem);

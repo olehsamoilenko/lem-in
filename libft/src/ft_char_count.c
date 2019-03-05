@@ -14,8 +14,11 @@
 
 int		ft_char_count(char c, char *line)
 {
-	int i = -1;
-	int res = 0;
+	int i;
+	int res;
+
+	res = 0;
+	i = -1;
 	while (line[++i])
 	{
 		if (line[i] == c)

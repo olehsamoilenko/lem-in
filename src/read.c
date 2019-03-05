@@ -10,15 +10,17 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lem-in.h"
+#include "lemin.h"
 
-int		get_next_line_counter(int mode, int fd, char **line, t_lem *lem)
+int			get_next_line_counter(int mode, int fd, char **line, t_lem *lem)
 {
-	static int count = 0;
+	static int	count = 0;
+	int			res;
+
 	if (mode == GNL_READ_MODE)
 	{
 		count++;
-		int res = get_next_line(fd, line);
+		res = get_next_line(fd, line);
 		if (lem->flag_color)
 			ft_putstr(RED);
 		if (res)
@@ -29,10 +31,11 @@ int		get_next_line_counter(int mode, int fd, char **line, t_lem *lem)
 	}
 	else if (mode == GNL_RETURN_COUNT_MODE)
 		return (count);
-	else return (0);
+	else
+		return (0);
 }
 
-int		command(char *line)
+static int	command(char *line)
 {
 	if (ft_strequ(line, "##start") ||
 	ft_strequ(line, "##end") ||
@@ -44,11 +47,13 @@ int		command(char *line)
 
 static void	ants_mode(char *line, int *mode, t_lem *lem)
 {
+	char *itoa;
+
 	if (command(line))
 		error("Commands are forbidden befone number of ants", lem);
 	else
 	{
-		char *itoa = ft_itoa(ft_atoi(line));
+		itoa = ft_itoa(ft_atoi(line));
 		if (ft_strequ(itoa, line) && ft_atoi(line) > 0)
 			lem->ants = ft_atoi(line);
 		else
@@ -58,7 +63,7 @@ static void	ants_mode(char *line, int *mode, t_lem *lem)
 	}
 }
 
-void	links_mode(char *line, t_lem *lem)
+void		links_mode(char *line, t_lem *lem)
 {
 	if (command(line))
 		error("Commands are forbidden for links", lem);
@@ -66,11 +71,12 @@ void	links_mode(char *line, t_lem *lem)
 		create_link(line, lem);
 }
 
-void	read_map(t_lem *lem)
+void		read_map(t_lem *lem)
 {
-	char *line;
-	int mode = MAP_ANTS_MODE;
+	char	*line;
+	int		mode;
 
+	mode = MAP_ANTS_MODE;
 	while (get_next_line_counter(GNL_READ_MODE, 0, &line, lem))
 	{
 		if (ft_strequ(line, ""))
@@ -85,4 +91,5 @@ void	read_map(t_lem *lem)
 			links_mode(line, lem);
 		ft_strdel(&line);
 	}
+	ft_putchar('\n');
 }

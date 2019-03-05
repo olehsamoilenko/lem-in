@@ -10,13 +10,15 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lem-in.h"
+#include "lemin.h"
 
-void	delete_path(t_list_of_nodes *path)
+void					delete_path(t_list_of_nodes *path)
 {
-	t_list_of_nodes *start = path;
+	t_list_of_nodes *start;
+
+	start = path;
 	if (path == NULL)
-		return;
+		return ;
 	while ((path)->next != NULL)
 	{
 		while ((path)->next->next != NULL)
@@ -26,27 +28,28 @@ void	delete_path(t_list_of_nodes *path)
 		path = start;
 	}
 	free(path);
-	// path = NULL;
-	
 }
 
-t_list_of_pathes *create_list_of_pathes(t_list_of_nodes *first_path)
+static t_list_of_pathes	*create_list_of_pathes(t_list_of_nodes *first_path)
 {
-	t_list_of_pathes *list = ft_memalloc(sizeof(t_list_of_pathes));
+	t_list_of_pathes *list;
+
+	list = ft_memalloc(sizeof(t_list_of_pathes));
 	list->path = first_path;
 	list->next = NULL;
 	return (list);
 }
 
-void	push_path(t_list_of_pathes **list, t_list_of_nodes *path)
+void					push_path(t_list_of_pathes **list,
+						t_list_of_nodes *path)
 {
+	t_list_of_pathes *start;
+
 	if (*list == NULL)
-	{
 		*list = create_list_of_pathes(path);
-	}
 	else
 	{
-		t_list_of_pathes *start = *list;
+		start = *list;
 		while ((*list)->next != NULL)
 			*list = (*list)->next;
 		(*list)->next = ft_memalloc(sizeof(t_list_of_pathes));
@@ -56,9 +59,11 @@ void	push_path(t_list_of_pathes **list, t_list_of_nodes *path)
 	}
 }
 
-int		path_len(t_list_of_nodes *list)
+int						path_len(t_list_of_nodes *list)
 {
-	int i = 0;
+	int i;
+
+	i = 0;
 	while (list)
 	{
 		i++;

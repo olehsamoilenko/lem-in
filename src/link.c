@@ -10,9 +10,9 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "lem-in.h"
+#include "lemin.h"
 
-int		path_contains_node(t_list_of_nodes *path, t_node *node) //rename
+int				node_in_path(t_list_of_nodes *path, t_node *node)
 {
 	while (path != NULL)
 	{
@@ -23,7 +23,7 @@ int		path_contains_node(t_list_of_nodes *path, t_node *node) //rename
 	return (0);
 }
 
-t_node	*find_node(char *name, t_list_of_nodes *nodes) // rename
+static t_node	*find_node(char *name, t_list_of_nodes *nodes)
 {
 	while (nodes)
 	{
@@ -34,19 +34,23 @@ t_node	*find_node(char *name, t_list_of_nodes *nodes) // rename
 	return (NULL);
 }
 
-void	create_link(char *line, t_lem *lem)
+void			create_link(char *line, t_lem *lem)
 {
-	char **params = ft_strsplit(line, '-');
+	char	**params;
+	t_node	*n1;
+	t_node	*n2;
+
+	params = ft_strsplit(line, '-');
 	if (ft_char_count(' ', line) != 0 || ft_arrlen(params) != 2)
 		error("Link definition example: room_1-room_2", lem);
-	t_node *n1 = find_node(params[0], lem->nodes);
-	t_node *n2 = find_node(params[1], lem->nodes);
+	n1 = find_node(params[0], lem->nodes);
+	n2 = find_node(params[1], lem->nodes);
 	ft_arrclr(params);
 	if (n1 == NULL || n2 == NULL)
 		error("Link contains an unknown room", lem);
 	if (n1 == n2)
 		error("Self-loops are forbidden", lem);
-	if (!path_contains_node(n1->links, n2) && !path_contains_node(n2->links, n1))
+	if (!node_in_path(n1->links, n2) && !node_in_path(n2->links, n1))
 	{
 		push_node(&n1->links, n2);
 		push_node(&n2->links, n1);
