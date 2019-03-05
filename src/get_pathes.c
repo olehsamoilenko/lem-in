@@ -68,11 +68,11 @@ void	get_pathes(t_list_of_pathes **pathes_1, t_list_of_pathes **pathes_2, t_lem 
 	t_list_of_nodes *path;
 
 	start_to_end_handle(lem, pathes_1, pathes_2);
-	while ((path = bfs(lem)))
+	while ((path = bfs(lem, BFS_ORIGINAL)))
 		push_path(pathes_1, path);
 	reset_used_nodes(lem->nodes, lem);
 	sort_nodes_by_amount_of_links(lem->nodes, lem);
-	while ((path = bfs_less_links_oriented(lem)))
+	while ((path = bfs(lem, BFS_LESS_LINKS)))
 		push_path(pathes_2, path);
 	sort_pathes_by_len(*pathes_2);
 	if (!*pathes_1 && !*pathes_2)

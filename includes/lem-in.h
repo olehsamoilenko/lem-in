@@ -21,6 +21,8 @@
 #define MAP_ANTS_MODE 2
 #define GNL_READ_MODE 0
 #define GNL_RETURN_COUNT_MODE 1
+#define BFS_ORIGINAL 0
+#define BFS_LESS_LINKS 1
 
 #define DEFAULT		"\033[0m"
 #define RED			"\033[1;31m"
@@ -145,8 +147,8 @@ void	push_ant(t_list_of_ants **ants, int num, t_list_of_nodes *ant_position, t_l
 // void	delete_list_of_ants(t_list_of_ants *ants);
 
 // bfs
-t_list_of_nodes *bfs(t_lem *lem);
-t_list_of_nodes *bfs_less_links_oriented(t_lem *lem);
+t_list_of_nodes *bfs(t_lem *lem, int mode);
+// t_list_of_nodes *bfs_less_links_oriented(t_lem *lem);
 void reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem);
 
 // flags

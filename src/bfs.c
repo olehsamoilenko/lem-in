@@ -46,42 +46,43 @@ void			work_with_links(t_list_of_nodes *links, t_list_of_nodes **queue, t_node *
 		{
 			push_node(queue, links->node);
 			links->node->bfs_in_queue = 1;
-			links->node->bfs_prev = prev;;
+			links->node->bfs_prev = prev;
 		}
 		links = links->next;
 	}
 }
 
-t_list_of_nodes *bfs(t_lem *lem)
+void			work_with_links_2(t_list_of_nodes *links, t_list_of_nodes **queue, t_node *prev)
 {
-	t_list_of_nodes *queue = create_list_of_nodes(lem->end); // mb node_push ?
+	int node_pushed = 0;
+	while (links)
+	{
+		if (links->node->bfs_in_queue == 0 && links->node->bfs_used == 0)
+		{
+			if (links->next != NULL || !node_pushed)
+			{
+				push_node(queue, links->node);
+				links->node->bfs_in_queue = 1;
+				links->node->bfs_prev = prev;
+				if (links->node->links->node != prev) ////// work ?????????????
+					node_pushed = 1;
+			}
+		}
+		links = links->next;
+	}
+}
+
+t_list_of_nodes *bfs(t_lem *lem, int mode)
+{
+	t_list_of_nodes *queue;
+	t_node			*node;
+	
+	queue = create_list_of_nodes(lem->end); // mb node_push ?
 	reset_nodes_in_queue(lem->nodes, lem);
 	
 	while(queue)
 	{
-		t_node *node = pop_node(&queue);
-		if (node == lem->start)
-		{
-			delete_path(queue);
-			return (form_path(lem->start, lem));
-		}
-		else
-			work_with_links(node->links, &queue, node);
-	}
-	return (NULL);
-}
-
-
-
-t_list_of_nodes	*bfs_less_links_oriented(t_lem *lem)
-{
-	t_list_of_nodes *queue = create_list_of_nodes(lem->end);
-	reset_nodes_in_queue(lem->nodes, lem);
-
-	while(queue)
-	{
-		int node_pushed = 0;
-		t_node *node = pop_node(&queue);
+		node = pop_node(&queue);
 		if (node == lem->start)
 		{
 			delete_path(queue);
@@ -89,24 +90,12 @@ t_list_of_nodes	*bfs_less_links_oriented(t_lem *lem)
 		}
 		else
 		{
-			t_list_of_nodes *tmp = node->links;
+			if (mode == 0)
+				work_with_links(node->links, &queue, node);
+			else if (mode == 1)
+				work_with_links_2(node->links, &queue, node);
+		}
 			
-			while (tmp)
-			{
-				if (tmp->node->bfs_in_queue == 0 && tmp->node->bfs_used == 0)
-				{
-					if (tmp->next != NULL || !node_pushed)
-					{
-						push_node(&queue, tmp->node);
-						tmp->node->bfs_in_queue = 1;
-						tmp->node->bfs_prev = node;
-						if (tmp->node->links->node != node) ////// work ?????????????
-							node_pushed = 1;
-					}
-				}
-				tmp = tmp->next;
-			}
-		}
 	}
 	return (NULL);
 }
