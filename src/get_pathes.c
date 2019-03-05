@@ -44,8 +44,8 @@ void	start_to_end_handle(t_lem *lem, t_list_of_pathes **pathes_1, t_list_of_path
 	if (path_contains_node(lem->start->links, lem->end))
 	{
 		t_list_of_nodes *path = NULL;
-		push_node(&path, lem->start, lem);
-		push_node(&path, lem->end, lem);
+		push_node(&path, lem->start);
+		push_node(&path, lem->end);
 		push_path(pathes_1, path);
 		push_path(pathes_2, path);
 		remove_node(&lem->start->links, lem->end);

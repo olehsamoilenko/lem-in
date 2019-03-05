@@ -18,7 +18,7 @@ t_list_of_nodes	*form_path(t_node *node, t_lem *lem)
 
 	while (node)
 	{
-		push_node(&path, node, lem);
+		push_node(&path, node);
 		node->bfs_used = 1;
 		node = node->bfs_prev;
 	}
@@ -38,6 +38,20 @@ void			reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem)
 	
 }
 
+void			work_with_links(t_list_of_nodes *links, t_list_of_nodes **queue, t_node *prev)
+{
+	while (links)
+	{
+		if (links->node->bfs_in_queue == 0 && links->node->bfs_used == 0)
+		{
+			push_node(queue, links->node);
+			links->node->bfs_in_queue = 1;
+			links->node->bfs_prev = prev;;
+		}
+		links = links->next;
+	}
+}
+
 t_list_of_nodes *bfs(t_lem *lem)
 {
 	t_list_of_nodes *queue = create_list_of_nodes(lem->end); // mb node_push ?
@@ -52,22 +66,12 @@ t_list_of_nodes *bfs(t_lem *lem)
 			return (form_path(lem->start, lem));
 		}
 		else
-		{
-			t_list_of_nodes *tmp = node->links;
-			while (tmp)
-			{
-				if (tmp->node->bfs_in_queue == 0 && tmp->node->bfs_used == 0)
-				{
-					push_node(&queue, tmp->node, lem);
-					tmp->node->bfs_in_queue = 1;
-					tmp->node->bfs_prev = node;;
-				}
-				tmp = tmp->next;
-			}
-		}
+			work_with_links(node->links, &queue, node);
 	}
 	return (NULL);
 }
+
+
 
 t_list_of_nodes	*bfs_less_links_oriented(t_lem *lem)
 {
@@ -93,7 +97,7 @@ t_list_of_nodes	*bfs_less_links_oriented(t_lem *lem)
 				{
 					if (tmp->next != NULL || !node_pushed)
 					{
-						push_node(&queue, tmp->node, lem);
+						push_node(&queue, tmp->node);
 						tmp->node->bfs_in_queue = 1;
 						tmp->node->bfs_prev = node;
 						if (tmp->node->links->node != node) ////// work ?????????????

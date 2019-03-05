@@ -117,7 +117,7 @@ void	error(char *message, t_lem *lem);
 
 // node
 t_node			*create_node(char *line, t_lem *lem);
-void			push_node(t_list_of_nodes **list, t_node *node, t_lem *lem);
+int	push_node(t_list_of_nodes **list, t_node *node);
 t_list_of_nodes	*create_list_of_nodes(t_node *first_node);
 t_node			*pop_node(t_list_of_nodes **list);
 void			remove_node(t_list_of_nodes **list, t_node *node);

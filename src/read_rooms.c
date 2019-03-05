@@ -20,7 +20,8 @@ void	handle_start_room(t_lem *lem)
 	t_node *node = create_node(line, lem);
 	ft_strdel(&line);
 	
-	push_node(&lem->nodes, node, lem);
+	if (!push_node(&lem->nodes, node))
+		error("Room's name must be unique", lem);
 
 
 	if (lem->start != NULL)
@@ -35,7 +36,8 @@ void	handle_end_room(t_lem *lem)
 	get_next_line_counter(GNL_READ_MODE, 0, &line, lem);
 	t_node *node = create_node(line, lem);
 	ft_strdel(&line);
-	push_node(&lem->nodes, node, lem);
+	if(!push_node(&lem->nodes, node))
+		error("Room's name must be unique", lem);
 	if (lem->end != NULL)
 		error("Too much end rooms", lem);
 	lem->end = node;
@@ -48,8 +50,17 @@ void	handle_mark(t_lem *lem)
 	get_next_line_counter(GNL_READ_MODE, 0, &line, lem);
 	t_node *node = create_node(line, lem);
 	ft_strdel(&line);
-	push_node(&lem->nodes, node, lem);
+	if(!push_node(&lem->nodes, node))
+		error("Room's name must be unique", lem);
 	node->marked = 1;
+}
+
+int		line_is_link(char *line)
+{
+	if(ft_strchr(line, '-') && ft_char_count(' ', line) == 0)
+		return (1);
+	else
+		return (0);
 }
 
 void	rooms_mode(char *line, int *mode, t_lem *lem)
@@ -60,7 +71,7 @@ void	rooms_mode(char *line, int *mode, t_lem *lem)
 		handle_end_room(lem);
 	else if (ft_strequ(line, "##mark"))
 		handle_mark(lem);
-	else if (ft_strchr(line, '-') && ft_char_count(' ', line) == 0)
+	else if (line_is_link(line))
 	{
 		*mode = MAP_LINKS_MODE;
 		links_mode(line, lem);
@@ -68,6 +79,7 @@ void	rooms_mode(char *line, int *mode, t_lem *lem)
 	else
 	{
 		t_node *node = create_node(line, lem);
-		push_node(&lem->nodes, node, lem);
+		if (!push_node(&lem->nodes, node))
+			error("Room's name must be unique", lem);
 	}
 }

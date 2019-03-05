@@ -20,7 +20,7 @@ t_list_of_nodes	*create_list_of_nodes(t_node *first_node)
 	return (list);
 }
 
-void	push_node(t_list_of_nodes **list, t_node *node, t_lem *lem)
+int	push_node(t_list_of_nodes **list, t_node *node)
 {
 	int unique = 1;
 	t_list_of_nodes *tmp = *list;
@@ -30,8 +30,6 @@ void	push_node(t_list_of_nodes **list, t_node *node, t_lem *lem)
 			unique = 0;
 		tmp = tmp->next;
 	}
-	if (!unique)
-		error("Room's name must be unique", lem);
 	if (*list == NULL)
 		*list = create_list_of_nodes(node);
 	else
@@ -46,6 +44,7 @@ void	push_node(t_list_of_nodes **list, t_node *node, t_lem *lem)
 		(*list)->next->next = NULL;
 		*list = start;
 	}
+	return (unique);
 }
 
 t_node	*pop_node(t_list_of_nodes **list)
