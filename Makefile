@@ -17,16 +17,17 @@ LIB =			-lft -L ./libft
 FLAGS =			#-Wall -Wextra -Werror
 LIST =			main \
 				read \
-				show_DELETE \
 				utils \
 				node \
 				link \
 				print \
 				path \
 				ant \
-				list \
 				bfs \
-				flags
+				flags \
+				get_pathes \
+				sort \
+				total_steps
 OBJ =			$(addprefix obj/, $(addsuffix .o, $(LIST)))
 
 all: $(NAME)

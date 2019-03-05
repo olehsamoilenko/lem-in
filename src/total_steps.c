@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   list.c                                             :+:      :+:    :+:   */
+/*   total_steps.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: osamoile <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
@@ -31,5 +31,19 @@ int		list_len(t_list_of_pathes *list)
 		res++;
 		list = list->next;
 	}
+	return (res);
+}
+
+int		total_steps(t_list_of_pathes *list, t_lem *lem)
+{
+	int l = total_len(list);
+	int k = list_len(list);
+
+	if (k == 0)
+		return (__INT_MAX__);
+
+	int res = (lem->ants + l) / k - 1;
+	if ((lem->ants + l) % k != 0)
+		res += 1;
 	return (res);
 }

@@ -190,14 +190,6 @@ void	print_total_steps(int total, t_lem *lem)
 		ft_putstr(DEFAULT);
 }
 
-void	directly(t_lem *lem)
-{
-	int i = 0;
-	while (++i <= lem->ants)
-	{
-
-	}
-}
 
 
 void	print_steps(t_list_of_pathes *pathes, t_lem *lem)
@@ -207,23 +199,18 @@ void	print_steps(t_list_of_pathes *pathes, t_lem *lem)
 	int ant_counter = 0;
 	int total = 0;
 
-	// if (pathes->path->node == lem->start && pathes->path->next->node == lem->end)
-	// {
-	// 	directly();
-	// }
-	// else
-	// {
+
+	new_ants(&ants, pathes, &ant_counter, lem);
+	while (ants)
+	{
+		step(ants, lem);
+		show_steps(ants, lem);
+		remove_finishers(&ants, lem);
 		new_ants(&ants, pathes, &ant_counter, lem);
-		while (ants)
-		{
-			step(ants, lem);
-			show_steps(ants, lem);
-			remove_finishers(&ants, lem);
-			new_ants(&ants, pathes, &ant_counter, lem);
-			total++;
-		}
-		delete_list_of_ants(ants); // need ?
-	// }
+		total++;
+	}
+	delete_list_of_ants(ants); // need ?
+	
 	
 	if (lem->flag_pathes)
 		show_pathes(pathes, lem);

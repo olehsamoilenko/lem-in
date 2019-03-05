@@ -32,21 +32,7 @@ int		get_next_line_counter(int mode, int fd, char **line, t_lem *lem)
 	else return (0);
 }
 
-int		total_steps(t_list_of_pathes *list, t_lem *lem)
-{
-	int l = total_len(list);
-	int k = list_len(list);
 
-	if (k == 0)
-		return (__INT_MAX__);
-
-	int res = (lem->ants + l) / k - 1;
-	if ((lem->ants + l) % k != 0)
-		res += 1;
-	return (res);
-
-	// return (-1);
-}
 
 
 void	error(char *message, t_lem *lem)

@@ -82,8 +82,8 @@ typedef struct	s_lem
 	t_list_of_nodes			*nodes;
 	t_node					*start;
 	t_node					*end;
-	t_list_of_pathes		*pathes_1;
-	t_list_of_pathes		*pathes_2;
+	// t_list_of_pathes		*pathes_1;
+	// t_list_of_pathes		*pathes_2;
 	int						flag_color;
 	int						flag_pathes;
 	int						flag_steps;
@@ -113,16 +113,13 @@ void	read_map(t_lem *lem);
 // utils.c
 int		get_next_line_counter(int mode, int fd, char **line, t_lem *lem);
 void	error(char *message, t_lem *lem);
-int		total_steps(t_list_of_pathes *list, t_lem *lem);
-
-// DELETE
-void	show_all_nodes(t_list_of_nodes *list, t_lem *lem);
 
 // node
 t_node			*create_node(char *line, t_lem *lem);
 void			push_node(t_list_of_nodes **list, t_node *node, t_lem *lem);
 t_list_of_nodes	*create_list_of_nodes(t_node *first_node);
-t_node	*pop_node(t_list_of_nodes **list);
+t_node			*pop_node(t_list_of_nodes **list);
+void			remove_node(t_list_of_nodes **list, t_node *node);
 
 //link
 int		path_contains_node(t_list_of_nodes *path, t_node *node); //rename
@@ -131,6 +128,7 @@ void	create_link(char *line, t_lem *lem);
 //path
 int		path_len(t_list_of_nodes *list);
 void	delete_path(t_list_of_nodes *path);
+void	push_path(t_list_of_pathes **list, t_list_of_nodes *path);
 
 // print
 void	print_steps(t_list_of_pathes *pathes, t_lem *lem);
@@ -140,16 +138,23 @@ void	print_steps(t_list_of_pathes *pathes, t_lem *lem);
 void	push_ant(t_list_of_ants **ants, int num, t_list_of_nodes *ant_position, t_lem *lem);
 void	delete_list_of_ants(t_list_of_ants *ants);
 
-// list
-int		total_len(t_list_of_pathes *list);
-int		list_len(t_list_of_pathes *list);
-
 // bfs
-t_list_of_nodes *bfs(t_node *start, t_node *end, t_lem *lem);
-t_list_of_nodes *bfs_less_links_oriented(t_node *start, t_node *end, t_lem *lem);
+t_list_of_nodes *bfs(t_lem *lem);
+t_list_of_nodes *bfs_less_links_oriented(t_lem *lem);
 void reset_nodes_in_queue(t_list_of_nodes *nodes, t_lem *lem);
 
 // flags
 void	flags_handle(int argc, char **argv, t_lem *lem);
+
+// get_pathes
+void	get_pathes(t_list_of_pathes **pathes_1, t_list_of_pathes **pathes_2, t_lem *lem);
+
+//sort
+void	sort_pathes_by_len(t_list_of_pathes *pathes);
+void	sort_nodes_by_amount_of_links(t_list_of_nodes *nodes, t_lem *lem);
+
+// total_steps
+int		total_steps(t_list_of_pathes *list, t_lem *lem);
+
 
 #endif

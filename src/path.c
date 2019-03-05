@@ -30,6 +30,33 @@ void	delete_path(t_list_of_nodes *path)
 	
 }
 
+t_list_of_pathes *create_list_of_pathes(t_list_of_nodes *first_path)
+{
+	t_list_of_pathes *list = ft_memalloc(sizeof(t_list_of_pathes));
+	list->path = first_path;
+	list->next = NULL;
+	return (list);
+}
+
+
+void	push_path(t_list_of_pathes **list, t_list_of_nodes *path)
+{
+	if (*list == NULL)
+	{
+		*list = create_list_of_pathes(path);
+	}
+	else
+	{
+		t_list_of_pathes *start = *list;
+		while ((*list)->next != NULL)
+			*list = (*list)->next;
+		(*list)->next = ft_memalloc(sizeof(t_list_of_pathes));
+		(*list)->next->path = path;
+		(*list)->next->next = NULL;
+		*list = start;
+	}
+}
+
 int		path_len(t_list_of_nodes *list)
 {
 	int i = 0;
